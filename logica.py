@@ -13,5 +13,5 @@ def ingresar_equipo():
     print("Equipo agregado correctamente")
 
 def ver_equipos():
-    df=pd.read_excel("data/equipos.xlsx")
-    print(df.to_string(index=False))
+    df=pd.read_excel("data/equipos.xlsx", index_col="id")
+    print(df)
