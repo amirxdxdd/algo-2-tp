@@ -41,13 +41,13 @@ while opcion != 4:
                 ingresar_equipo()
 
             elif sub_opcion1 == 2:
-                print("Ingresar partidos")
+                ingresar_partido()
 
             elif sub_opcion1 == 3:
                 ver_equipos()
 
             elif sub_opcion1 == 4:
-                print("Ver partidos")
+                ver_partidos()
 
             sub_opcion1 = confi.elegir()
 
