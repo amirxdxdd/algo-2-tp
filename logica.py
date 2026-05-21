@@ -61,15 +61,20 @@ def ver_equipos():
     print(df.to_string(index=False))    #se tiene que imprimir de esta forma para que no imprima los indices
 
 def ingresar_partido():
-    df_par = pd.read_excel("data/partidos.xlsx")
+    df_par= pd.read_excel("data/partidos.xlsx")
     
-    fecha = input("Fecha DD/MM/AAAA: ")
-    eq1 = input("ID equipo 1: ").upper()
-    eq2 = input("ID equipo 2: ").upper()
-    g1 = int(input("Goles equipo 1: "))
-    g2 = int(input("Goles equipo 2: "))
-    
-    df_par.loc[len(df_par)] = [fecha, eq1, eq2, g1, g2]
+    fecha=input("Fecha DD/MM/AAAA: ")
+    hora=input("Hora HH:MM: ")
+    lugar=input("Lugar: ")
+    eq1=input("ID equipo 1: ").upper()
+    eq2=input("ID equipo 2: ").upper()
+    g1=int(input("Goles equipo 1: "))
+    g2=int(input("Goles equipo 2: "))
+    pen1=int(input("Penales equipo 1 (0 si no hubo): "))
+    pen2=int(input("Penales equipo 2 (0 si no hubo): "))
+    fase=input("Fase (Grupos/Octavos/Cuartos/Semifinal/Final): ")
+
+    df_par.loc[len(df_par)] = [fecha, hora, lugar, eq1, eq2, g1, g2, pen1, pen2, fase]
     df_par.to_excel("data/partidos.xlsx", index=False)
     print("Partido agregado correctamente")
 
