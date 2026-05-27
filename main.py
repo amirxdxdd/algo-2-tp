@@ -16,7 +16,7 @@ def abrir_ingresar_equipo():
     ventana_equipo.title("Ingresar Equipo")
     ventana_equipo.geometry("420x580")   #Esto debe tener este tamaño minimo para que aparezca el boton de guardar
     ventana_equipo.resizable(False, False)  #No se puede cambiar la resolucion
-    ventana_equipo.grab_set()  #No se puede usar la ventana anterior
+    
 
     header_equipo = ctk.CTkFrame(ventana_equipo, corner_radius=0, fg_color="#1a1a2e")
     header_equipo.pack(fill="x")
@@ -88,6 +88,7 @@ def abrir_ingresar_equipo():
         command=ventana_equipo.destroy
     ).pack(pady=4)
 
+    ventana_equipo.grab_set()  #No se puede usar la ventana anterior
 
 
 
@@ -109,8 +110,8 @@ def abrir_configuracion():
     ventana_config.title("Configuración del Torneo")
     ventana_config.geometry("600x460")
     ventana_config.resizable(False, False)  #se me bugea en linux cambiar la resolucion de esta ventana, bloqueo para evitar
-    ventana_config.grab_set()  #bloquea la ventana principal mientras esta abierto configuracion
-
+    
+    
     #nuevo header, igual al menu principal
     header_config = ctk.CTkFrame(ventana_config, corner_radius=0, fg_color="#1a1a2e")
     header_config.pack(fill="x")
@@ -144,6 +145,7 @@ def abrir_configuracion():
             command=comando
         ).pack(pady=7)
 
+    ventana_config.grab_set()  #bloquea la ventana principal mientras esta abierto configuracion
 
 
 def abrir_resultados():
