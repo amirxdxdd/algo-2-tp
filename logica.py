@@ -36,19 +36,10 @@ def calcular_stats():
 
     return stats
 
-def ingresar_equipo():
-    df = pd.read_excel("data/equipos.xlsx")     
-    #para ingresar los equipos, solo son necesarios estos datos, no es necesario preocuparse por los puntos, de momento
-    #cuando vaya a ver los equipos necesitare de la funcion que calcule las estadisticas para poder verlos en orden
-    id = input("ID: ")
-    pais = input("País: ")
-    grupo = input("Grupo: ")
-    prefijo = int(input("Prefijo: "))
-    confederacion = input("Confederación: ")
-
-    df.loc[len(df)]=[id, pais, grupo, prefijo, confederacion] 
-    df.to_excel("data/equipos.xlsx", index=False)   #se envia de esta forma para que no ponga indices
-    print("Equipo agregado correctamente")
+def ingresar_equipo(id_eq, pais, grupo, prefijo, confederacion):
+    df = pd.read_excel("data/equipos.xlsx") #Lee el dataframe
+    df.loc[len(df)] = [id_eq, pais, grupo, prefijo, confederacion] #Guarda en el dataframe
+    df.to_excel("data/equipos.xlsx", index=False) #Guarda en el excel sin indice
 
 def ver_equipos():
 
