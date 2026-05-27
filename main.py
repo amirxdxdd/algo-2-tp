@@ -1,5 +1,7 @@
 import customtkinter as ctk
 from datetime import datetime
+from logica import *
+
 
 def actualizar_hora():
     ahora = datetime.now().strftime("%d/%m/%Y  %H:%M:%S") #Convierte a str la fecha y hora actual y guarda en ahora
@@ -10,7 +12,84 @@ def actualizar_hora():
 
 #Funciones para configuracion del torneo
 def abrir_ingresar_equipo():
-    print("Ingresar equipo")
+    ventana_equipo = ctk.CTkToplevel(ventana)   #Todo igual a las otras ventanas
+    ventana_equipo.title("Ingresar Equipo")
+    ventana_equipo.geometry("420x580")   #Esto debe tener este tamaño minimo para que aparezca el boton de guardar
+    ventana_equipo.resizable(False, False)  #No se puede cambiar la resolucion
+    ventana_equipo.grab_set()  #No se puede usar la ventana anterior
+
+    header_equipo = ctk.CTkFrame(ventana_equipo, corner_radius=0, fg_color="#1a1a2e")
+    header_equipo.pack(fill="x")
+
+    ctk.CTkLabel(
+        header_equipo,
+        text="Ingresar Equipo",
+        font=ctk.CTkFont(size=18, weight="bold"),
+        text_color="#e94560"
+    ).pack(pady=14)
+
+    #Aca pongo los campos del formulario
+    frame_form = ctk.CTkFrame(ventana_equipo, fg_color="transparent")
+    frame_form.pack(padx=40, pady=20, fill="x")
+
+    #los campos del formulario
+    campos=["ID (ej: A1)", "Pais", "Grupo (ej: A)", "Prefijo telefonico", "Confederacion"]
+    entradas={}  #uso un diccionario para guardar cada campo y acceder a su valor despues
+
+    for campo in campos:
+        ctk.CTkLabel(
+            frame_form,
+            text=campo,
+            anchor="w" #anchor="w" alinea el texto a la izquierda, west es oeste en ingles
+        ).pack(fill="x", pady=(8, 2))
+
+        entrada=ctk.CTkEntry(frame_form, width=340)
+        entrada.pack()
+        entradas[campo] = entrada   #se guarda la entrada en el diccionario con el nombre del campo como clave
+
+    #Label para mostrar mensajes de error o exito
+    label_mensaje = ctk.CTkLabel(ventana_equipo, text="", text_color="#aaaaaa")
+    label_mensaje.pack(pady=(10, 4))
+
+    def guardar():
+        id_eq=entradas["ID (ej: A1)"].get().strip().upper()         #.get() obtiene texto escrito por el usuario 
+        pais=entradas["Pais"].get().strip()                         #.strip() quita los espacios que estan de mas
+        grupo=entradas["Grupo (ej: A)"].get().strip().upper()       #.upper() pone en mayuscula
+        prefijo=entradas["Prefijo telefonico"].get().strip()
+        confederacion=entradas["Confederacion"].get().strip()
+
+        #verificar que no hayan campos vacios
+        if id_eq == "" or pais == "" or grupo == "" or prefijo == "" or confederacion == "":
+            label_mensaje.configure(text="Completa todos los campos.", text_color="#e94560")
+            return
+
+        if not prefijo.isdigit():
+            label_mensaje.configure(text="El prefijo debe ser un numero.", text_color="#e94560")
+            return
+
+        ingresar_equipo(id_eq, pais, grupo, int(prefijo), confederacion)   #Lo guarda en excel
+        label_mensaje.configure(text="Equipo guardado correctamente.", text_color="#44bb77")
+
+        
+
+    ctk.CTkButton(    #Boton para guardar equipo
+        ventana_equipo,
+        text="Guardar Equipo",
+        width=200,
+        command=guardar
+    ).pack(pady=4)
+
+    ctk.CTkButton(     #Boton para cancelar o regresar
+        ventana_equipo,
+        text="Volver",
+        width=200,
+        fg_color="transparent",     
+        border_width=1,             
+        command=ventana_equipo.destroy
+    ).pack(pady=4)
+
+
+
 
 def abrir_ingresar_partido():
     print("Ingresar partido")
