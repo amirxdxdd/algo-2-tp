@@ -55,7 +55,30 @@ while opcion != 4:
         print("Registro de Resultados")
 
     elif opcion == 3:
-        print("Emisión de Informes")
+        infors=Menu(["Partidos por fecha","Tabla de posiciones por grupo/fecha","Resultados por equipos","Próximo partido de un Equipo","Tabla de todos los grupos","Volver"])
+        sub_opcion3=infors.elegir()
+        while sub_opcion3!=6:
+            if sub_opcion3==1:
+                fecha = input("Ingrese fecha DD/MM/AAAA: ")
+                informe_partidos_por_fecha(fecha)
+
+            elif sub_opcion3==2:
+                print("Tabla de posiciones")
+
+            elif sub_opcion3==3:
+                print("Resultados por equipos")
+
+            elif sub_opcion3==4:
+                print("Proximo partido")
+
+            elif sub_opcion3==5:
+                print("Tabla de todos los grupos")
+                
+            sub_opcion3=infors.elegir()
+
+
+
+
 
     opcion = main_menu.elegir()
 

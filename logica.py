@@ -81,3 +81,26 @@ def ingresar_partido():
 def ver_partidos():
     df=pd.read_excel("data/partidos.xlsx")
     print(df.to_string(index=False))
+
+#Informes
+def informe_partidos_por_fecha(fecha):
+    df = pd.read_excel("data/partidos.xlsx")
+
+    # convertimos la columna a texto para comparar sin problemas de formato
+    df["fecha"] = df["fecha"].astype(str)
+
+    resultado = df[df["fecha"] == fecha]
+
+    if resultado.empty:     #Metodo de pandas para verificar si un dataframe esta vacio
+        print(f"No hay partidos para la fecha {fecha}")
+        return
+
+    print(f"\nPartidos del {fecha}:")
+    print("-" * 50)
+
+    for i in range(len(resultado)):
+        fila = resultado.iloc[i]  # iloc obtiene la fila por posicion
+        print(f"{fila['hora']} hs — {fila['lugar']}")
+        print(f"  {fila['equipo1']}  {int(fila['goles1'])} : {int(fila['goles2'])}  {fila['equipo2']}")
+        print(f"  Fase: {fila['fase']}")
+        print()
