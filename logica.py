@@ -36,62 +36,44 @@ def calcular_stats():
 
     return stats
 
+
+def obtener_pais(id_eq):
+    df=pd.read_excel("data/equipos.xlsx")
+    resultado = df[df["id"]==id_eq]  #resultado guarda el df filtrado con el unico pais que tiene ese id
+    if len(resultado)==0:
+        return id_eq  #si no encuentra el equipo con ese id, devuelve el id
+    return resultado.iloc[0]["pais"]   #accede a la primera fila, columna "pais"
+
 def ingresar_equipo(id_eq, pais, grupo, prefijo, confederacion):
     df = pd.read_excel("data/equipos.xlsx") #Lee el dataframe
     df.loc[len(df)] = [id_eq, pais, grupo, prefijo, confederacion] #Guarda en el dataframe
     df.to_excel("data/equipos.xlsx", index=False) #Guarda en el excel sin indice
 
 def ver_equipos():
-
-    df = calcular_stats()
-    df = df.sort_values(
-        by=["puntos", "dg", "gf", "prefijo"],       #ordena antes de imprimir los equipos siguiendo los 4 criterios
-        ascending=[False, False, False, False] #en cualquier caso se ordena de forma descendente
+    df=calcular_stats()
+    df=df.sort_values(
+        by=["puntos", "dg", "gf", "prefijo"],
+        ascending=[False, False, False, False]
     )
+    return df    #devuelve el dataframe en orden
 
-    print(df.to_string(index=False))    #se tiene que imprimir de esta forma para que no imprima los indices
 
-def ingresar_partido():
-    df_par= pd.read_excel("data/partidos.xlsx")
-    
-    fecha=input("Fecha DD/MM/AAAA: ")
-    hora=input("Hora HH:MM: ")
-    lugar=input("Lugar: ")
-    eq1=input("ID equipo 1: ").upper()
-    eq2=input("ID equipo 2: ").upper()
-    g1=int(input("Goles equipo 1: "))
-    g2=int(input("Goles equipo 2: "))
-    pen1=int(input("Penales equipo 1 (0 si no hubo): "))
-    pen2=int(input("Penales equipo 2 (0 si no hubo): "))
-    fase=input("Fase (Grupos/Octavos/Cuartos/Semifinal/Final): ")
 
-    df_par.loc[len(df_par)] = [fecha, hora, lugar, eq1, eq2, g1, g2, pen1, pen2, fase]
-    df_par.to_excel("data/partidos.xlsx", index=False)
-    print("Partido agregado correctamente")
+
+def ingresar_partido(fecha, hora, lugar, equipo1, equipo2, goles1, goles2, penales1, penales2, fase):
+    df = pd.read_excel("data/partidos.xlsx")
+    df.loc[len(df)] = [fecha, hora, lugar, equipo1, equipo2, goles1, goles2, penales1, penales2, fase]
+    df.to_excel("data/partidos.xlsx", index=False)
 
 def ver_partidos():
-    df=pd.read_excel("data/partidos.xlsx")
-    print(df.to_string(index=False))
+    df = pd.read_excel("data/partidos.xlsx")
+    return df
+
+
 
 #Informes
-def informe_partidos_por_fecha(fecha):
-    df = pd.read_excel("data/partidos.xlsx")
-
-    # convertimos la columna a texto para comparar sin problemas de formato
-    df["fecha"] = df["fecha"].astype(str)
-
-    resultado = df[df["fecha"] == fecha]
-
-    if resultado.empty:     #Metodo de pandas para verificar si un dataframe esta vacio
-        print(f"No hay partidos para la fecha {fecha}")
-        return
-
-    print(f"\nPartidos del {fecha}:")
-    print("-" * 50)
-
-    for i in range(len(resultado)):
-        fila = resultado.iloc[i]  # iloc obtiene la fila por posicion
-        print(f"{fila['hora']} hs — {fila['lugar']}")
-        print(f"  {fila['equipo1']}  {int(fila['goles1'])} : {int(fila['goles2'])}  {fila['equipo2']}")
-        print(f"  Fase: {fila['fase']}")
-        print()
+def informe_partidos_por_fecha(fecha): #Informe 1
+     df = pd.read_excel("data/partidos.xlsx")
+     df["fecha"]=df["fecha"].astype(str)  #se connvierte a cadena para comparar sin problemas
+     fechas=df[df["fecha"] == fecha]  #Filtra las fechas que coincidan con el parametro
+     return fechas
