@@ -111,7 +111,7 @@ def abrir_ingresar_partido():
     frame_form = ctk.CTkFrame(ventana_partido, fg_color="transparent")
     frame_form.pack(padx=40, pady=20, fill="x")
 
-    campos = ["Fecha (DD/MM/AAAA)", "Hora (HH:MM)", "Lugar", "ID Equipo 1", "ID Equipo 2", "Goles Equipo 1", "Goles Equipo 2", "Penales Equipo 1", "Penales Equipo 2", "Fase"]
+    campos = ["Fecha (DD/MM/AAAA)", "Hora (HH:MM)", "Lugar", "Equipo 1", "Equipo 2", "Goles Equipo 1", "Goles Equipo 2", "Penales Equipo 1", "Penales Equipo 2", "Fase"]
     entradas = {}
 
     for campo in campos:
@@ -128,20 +128,20 @@ def abrir_ingresar_partido():
     label_mensaje = ctk.CTkLabel(ventana_partido, text="", text_color="#aaaaaa")
     label_mensaje.pack(pady=(10, 4))
 
-    def guardar():    #Esto es practimanete igual al ingreso de equipos
-        fecha=entradas["Fecha (DD/MM/AAAA)"].get().strip() 
-        hora=entradas["Hora (HH:MM)"].get().strip()
-        lugar=entradas["Lugar"].get().strip()
-        eq1=entradas["ID Equipo 1"].get().strip().upper()
-        eq2=entradas["ID Equipo 2"].get().strip().upper()
-        g1=entradas["Goles Equipo 1"].get().strip()
-        g2=entradas["Goles Equipo 2"].get().strip()
-        pen1=entradas["Penales Equipo 1"].get().strip()
-        pen2=entradas["Penales Equipo 2"].get().strip()
-        fase=entradas["Fase"].get().strip()
+    def guardar():
+        fecha  = entradas["Fecha (DD/MM/AAAA)"].get().strip()
+        hora   = entradas["Hora (HH:MM)"].get().strip()
+        lugar  = entradas["Lugar"].get().strip()
+        pais1  = entradas["Equipo 1"].get().strip()
+        pais2  = entradas["Equipo 2"].get().strip()
+        g1     = entradas["Goles Equipo 1"].get().strip()
+        g2     = entradas["Goles Equipo 2"].get().strip()
+        pen1   = entradas["Penales Equipo 1"].get().strip()
+        pen2   = entradas["Penales Equipo 2"].get().strip()
+        fase   = entradas["Fase"].get().strip()
 
-        #verificar campos vacios
-        if fecha == "" or hora == "" or lugar == "" or eq1 == "" or eq2 == "" or g1 == "" or g2 == "" or pen1 == "" or pen2 == "" or fase == "":
+        #verificar que no hayan campos vacios
+        if fecha=="" or hora=="" or lugar=="" or pais1=="" or pais2=="" or g1=="" or g2=="" or pen1=="" or pen2=="" or fase=="":
             label_mensaje.configure(text="Completa todos los campos.", text_color="#e94560")
             return
 
@@ -150,8 +150,21 @@ def abrir_ingresar_partido():
             label_mensaje.configure(text="Goles y penales deben ser numeros.", text_color="#e94560")
             return
 
-        ingresar_partido(fecha, hora, lugar, eq1, eq2, int(g1), int(g2), int(pen1), int(pen2), fase)   #Es importante guardart como int los numeros
+        #buscar el ID rapidin (No quiero hacer una funcion porque no volvere a usar esto)
+        equipos = pd.read_excel("data/equipos.xlsx")
+        eq1 = equipos[equipos["pais"].str.upper() == pais1.upper()]
+        eq2 = equipos[equipos["pais"].str.upper() == pais2.upper()]
+
+        if len(eq1) == 0 or len(eq2) == 0:
+            label_mensaje.configure(text="Uno de los equipos no existe.", text_color="#e94560")
+            return
+
+        id_eq1 = eq1.iloc[0]["id"]
+        id_eq2 = eq2.iloc[0]["id"]
+
+        ingresar_partido(fecha, hora, lugar, id_eq1, id_eq2, int(g1), int(g2), int(pen1), int(pen2), fase)
         label_mensaje.configure(text="Partido guardado correctamente.", text_color="#44bb77")
+
 
     ctk.CTkButton(
         ventana_partido,
@@ -427,8 +440,85 @@ def abrir_informe1():
 
     ventana_inf1.grab_set()
 
+
+
 def abrir_informe2():
-    print("Informe 2")
+    ventana_inf2 = ctk.CTkToplevel(ventana)
+    ventana_inf2.title("Tabla de posiciones por grupo")
+    ventana_inf2.geometry("600x500")
+    ventana_inf2.resizable(False, False)
+
+    header_inf2=ctk.CTkFrame(ventana_inf2, corner_radius=0, fg_color="#1a1a2e")
+    header_inf2.pack(fill="x")
+
+    ctk.CTkLabel(
+        header_inf2,
+        text="Tabla de Posiciones por Grupo",
+        font=ctk.CTkFont(size=18, weight="bold"),
+        text_color="#e94560"
+    ).pack(pady=14)
+
+    frame_input=ctk.CTkFrame(ventana_inf2, fg_color="transparent")
+    frame_input.pack(pady=20)
+
+    ctk.CTkLabel(
+        frame_input,
+        text="Grupo (ej: A):",
+    ).pack(side="left", padx=(0, 10))
+
+    entrada_grupo=ctk.CTkEntry(frame_input, width=80)
+    entrada_grupo.pack(side="left")
+
+    textbox=ctk.CTkTextbox(ventana_inf2, width=540, height=280, font=ctk.CTkFont(family="Courier", size=12))
+    textbox.pack(pady=(0, 10))
+    textbox.configure(state="disabled")
+
+    def buscar():
+        grupo=entrada_grupo.get().strip()
+
+        if grupo=="":
+            return
+
+        df=informe_tabla_grupo(grupo)
+
+        textbox.configure(state="normal")
+        textbox.delete("1.0", "end")
+
+        if df is None:
+            textbox.insert("end", f"No existe el grupo {grupo.upper()}")
+        else:
+            textbox.insert("end", f"Tabla de posiciones — Grupo {grupo.upper()}\n")
+            textbox.insert("end", "─" * 55 + "\n")
+            textbox.insert("end", f"{'POS':<5} {'PAIS':<20} {'PJ':<5} {'GF':<5} {'GC':<5} {'DG':<5} {'PTS':<5}\n")
+            textbox.insert("end", "─" * 55 + "\n")
+
+            for i in range(len(df)):
+                fila = df.iloc[i]
+                textbox.insert("end", f"{i+1:<5} {str(fila['pais']):<20} {int(fila['pj']):<5} {int(fila['gf']):<5} {int(fila['gc']):<5} {int(fila['dg']):<5} {int(fila['puntos']):<5}\n")
+
+        textbox.configure(state="disabled")
+
+    ctk.CTkButton(
+        ventana_inf2,
+        text="Buscar",
+        width=150,
+        command=buscar
+    ).pack(pady=(0, 8))
+
+    ctk.CTkButton(
+        ventana_inf2,
+        text="Volver",
+        width=150,
+        fg_color="transparent",
+        border_width=1,
+        command=ventana_inf2.destroy
+    ).pack()
+
+    ventana_inf2.grab_set()
+
+
+
+
 
 def abrir_informe3():
     print("Informe 3")
