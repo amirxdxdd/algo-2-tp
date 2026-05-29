@@ -95,7 +95,7 @@ def abrir_ingresar_equipo():   #Todo igual a las otras ventanas
 def abrir_ingresar_partido():
     ventana_partido=ctk.CTkToplevel(ventana)   #Igual al anterior
     ventana_partido.title("Ingresar Partido")
-    ventana_partido.geometry("700x760")
+    ventana_partido.geometry("700x500")
     ventana_partido.resizable(False, False)
 
     header_partido=ctk.CTkFrame(ventana_partido, corner_radius=0, fg_color="#1a1a2e")
@@ -111,17 +111,17 @@ def abrir_ingresar_partido():
     frame_form=ctk.CTkFrame(ventana_partido, fg_color="transparent")
     frame_form.pack(padx=40, pady=20, fill="x")
 
-    campos = ["Fecha (DD/MM/AAAA)", "Hora (HH:MM)", "Lugar", "Equipo 1", "Equipo 2", "Goles Equipo 1", "Goles Equipo 2", "Penales Equipo 1", "Penales Equipo 2", "Fase"]
-    entradas = {}
+    campos=["Fecha (DD/MM/AAAA)", "Hora (HH:MM)", "Lugar", "Equipo 1", "Equipo 2"]
+    entradas={}
 
     for campo in campos:
         ctk.CTkLabel(
             frame_form,
             text=campo,
             anchor="w"
-        ).pack(fill="x", pady=(1, 1))
+        ).pack(fill="x", pady=(2, 2))
 
-        entrada = ctk.CTkEntry(frame_form, width=340)   #Cuadro para ingresar datos
+        entrada=ctk.CTkEntry(frame_form, width=340)   #Cuadro para ingresar datos
         entrada.pack()
         entradas[campo]=entrada
 
@@ -134,23 +134,13 @@ def abrir_ingresar_partido():
         lugar=entradas["Lugar"].get().strip()
         pais1=entradas["Equipo 1"].get().strip()
         pais2=entradas["Equipo 2"].get().strip()
-        g1=entradas["Goles Equipo 1"].get().strip()
-        g2=entradas["Goles Equipo 2"].get().strip()
-        pen1=entradas["Penales Equipo 1"].get().strip()
-        pen2=entradas["Penales Equipo 2"].get().strip()
-        fase=entradas["Fase"].get().strip()
 
         #verificar que no hayan campos vacios
-        if fecha=="" or hora=="" or lugar=="" or pais1=="" or pais2=="" or g1=="" or g2=="" or pen1=="" or pen2=="" or fase=="":
+        if fecha=="" or hora=="" or lugar=="" or pais1=="" or pais2=="":
             label_mensaje.configure(text="Completa todos los campos.", text_color="#e94560")
             return
 
-        #verificar que goles y penales sean numeros
-        if not g1.isdigit() or not g2.isdigit() or not pen1.isdigit() or not pen2.isdigit():
-            label_mensaje.configure(text="Goles y penales deben ser numeros.", text_color="#e94560")
-            return
-
-        #buscar el ID rapidin (No quiero hacer una funcion porque no volvere a usar esto)
+        #Buscar el equipo
         equipos=pd.read_excel("data/equipos.xlsx")
         eq1=equipos[equipos["pais"].str.upper()==pais1.upper()]
         eq2=equipos[equipos["pais"].str.upper()==pais2.upper()]
@@ -159,10 +149,10 @@ def abrir_ingresar_partido():
             label_mensaje.configure(text="Uno de los equipos no existe.", text_color="#e94560")
             return
 
-        id_eq1=eq1.iloc[0]["id"]
+        id_eq1=eq1.iloc[0]["id"]    #Obtener los id
         id_eq2=eq2.iloc[0]["id"]
 
-        ingresar_partido(fecha, hora, lugar, id_eq1, id_eq2, int(g1), int(g2), int(pen1), int(pen2), fase)
+        ingresar_partido(fecha, hora, lugar, id_eq1, id_eq2, 0, 0, 0, 0, "Grupos")  #Esto solo lo agenda al calendario, todavia no se cargan los goles
         label_mensaje.configure(text="Partido guardado correctamente.", text_color="#44bb77")
 
 
@@ -171,7 +161,7 @@ def abrir_ingresar_partido():
         text="Guardar Partido",
         width=200,
         command=guardar
-    ).pack(pady=1)
+    ).pack(pady=2)
 
     ctk.CTkButton(
         ventana_partido,
@@ -180,7 +170,7 @@ def abrir_ingresar_partido():
         fg_color="transparent",
         border_width=1,
         command=ventana_partido.destroy
-    ).pack(pady=1)
+    ).pack(pady=2)
 
     ventana_partido.grab_set()
 
@@ -312,7 +302,79 @@ def abrir_configuracion():
 
 
 def abrir_resultados():
-    print("Resultados")
+    ventana_res=ctk.CTkToplevel(ventana)
+    ventana_res.title("Registro de Resultados")
+    ventana_res.geometry("500x740")
+    ventana_res.resizable(False, False)
+
+    header_res=ctk.CTkFrame(ventana_res, corner_radius=0, fg_color="#1a1a2e")
+    header_res.pack(fill="x")
+
+    ctk.CTkLabel(
+        header_res,
+        text="Registro de Resultados",
+        font=ctk.CTkFont(size=18, weight="bold"),
+        text_color="#e94560"
+    ).pack(pady=14)
+
+    frame_form=ctk.CTkFrame(ventana_res, fg_color="transparent")
+    frame_form.pack(padx=40, pady=20, fill="x")
+
+    campos=["Fecha (DD/MM/AAAA)", "Equipo 1", "Equipo 2", "Goles Equipo 1", "Goles Equipo 2", "Penales Equipo 1", "Penales Equipo 2"]
+    entradas={}
+
+    for campo in campos:
+        ctk.CTkLabel(frame_form, text=campo, anchor="w").pack(fill="x", pady=(6, 2))
+        entrada=ctk.CTkEntry(frame_form, width=340)
+        entrada.pack()
+        entradas[campo]=entrada
+
+    label_mensaje=ctk.CTkLabel(ventana_res, text="", text_color="#aaaaaa")
+    label_mensaje.pack(pady=(10, 4))
+
+    def guardar():
+        fecha=entradas["Fecha (DD/MM/AAAA)"].get().strip()
+        pais1=entradas["Equipo 1"].get().strip()
+        pais2=entradas["Equipo 2"].get().strip()
+        g1=entradas["Goles Equipo 1"].get().strip()
+        g2=entradas["Goles Equipo 2"].get().strip()
+        pen1=entradas["Penales Equipo 1"].get().strip()
+        pen2=entradas["Penales Equipo 2"].get().strip()
+
+        if fecha=="" or pais1=="" or pais2=="" or g1=="" or g2=="" or pen1=="" or pen2=="":
+            label_mensaje.configure(text="Completa todos los campos.", text_color="#e94560")
+            return
+
+        if not g1.isdigit() or not g2.isdigit() or not pen1.isdigit() or not pen2.isdigit():
+            label_mensaje.configure(text="Goles y penales deben ser numeros.", text_color="#e94560")
+            return
+
+        resultado=registrar_resultado(fecha, pais1, pais2, int(g1), int(g2), int(pen1), int(pen2))
+
+        if resultado=="equipo_no_existe":
+            label_mensaje.configure(text="Uno de los equipos no existe.", text_color="#e94560")
+        elif resultado=="partido_no_existe":
+            label_mensaje.configure(text="No existe ese partido en el calendario.", text_color="#e94560")
+        else:
+            label_mensaje.configure(text="Resultado registrado correctamente.", text_color="#44bb77")
+
+    ctk.CTkButton(
+        ventana_res,
+        text="Guardar Resultado",
+        width=200,
+        command=guardar
+    ).pack(pady=4)
+
+    ctk.CTkButton(
+        ventana_res,
+        text="Volver",
+        width=200,
+        fg_color="transparent",
+        border_width=1,
+        command=ventana_res.destroy
+    ).pack(pady=4)
+
+    ventana_res.grab_set()
 
 
 

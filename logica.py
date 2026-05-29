@@ -63,13 +63,53 @@ def ver_equipos():
 
 
 def ingresar_partido(fecha, hora, lugar, equipo1, equipo2, goles1, goles2, penales1, penales2, fase):
-    df = pd.read_excel("data/partidos.xlsx")
-    df.loc[len(df)] = [fecha, hora, lugar, equipo1, equipo2, goles1, goles2, penales1, penales2, fase]
+    df=pd.read_excel("data/partidos.xlsx")
+    df.loc[len(df)]=[fecha, hora, lugar, equipo1, equipo2, goles1, goles2, penales1, penales2, fase]
     df.to_excel("data/partidos.xlsx", index=False)
 
 def ver_partidos():
     df = pd.read_excel("data/partidos.xlsx")
     return df
+
+
+
+
+
+def registrar_resultado(fecha, pais1, pais2, goles1, goles2, penales1, penales2):
+    df=pd.read_excel("data/partidos.xlsx")
+    equipos=pd.read_excel("data/equipos.xlsx")
+
+    #buscar los equipos
+    eq1=equipos[equipos["pais"].str.upper() == pais1.upper()]
+    eq2=equipos[equipos["pais"].str.upper() == pais2.upper()]
+
+    if len(eq1)==0 or len(eq2)==0:
+        return "equipo_no_existe"
+
+    id_eq1=eq1.iloc[0]["id"]  #obtener los ids
+    id_eq2=eq2.iloc[0]["id"]
+
+    #buscamos el partido en el calendario
+    df["fecha"]=df["fecha"].astype(str)
+    partido=df[
+        (df["fecha"]==fecha) & (df["equipo1"]==id_eq1) & (df["equipo2"]==id_eq2)]   #Busca el partido con esa fecha, ese eq1 y ese eq2
+
+    if len(partido)==0:
+        return "partido_no_existe"
+
+    #actualizamos los goles en la fila correspondiente
+    indice=partido.index[0]   #el df partido guardo el indice que tenia en el excel partidos
+    df.loc[indice, "goles1"]=goles1
+    df.loc[indice, "goles2"]=goles2
+    df.loc[indice, "penales1"]=penales1
+    df.loc[indice, "penales2"]=penales2
+
+    df.to_excel("data/partidos.xlsx", index=False)
+    return "ok"
+
+
+
+
 
 
 
