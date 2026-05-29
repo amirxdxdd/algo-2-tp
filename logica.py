@@ -15,7 +15,7 @@ def calcular_stats():   #Para la fase de grupos, devuelve una tabla similar a la
         local=partidos[partidos["equipo1"] == eid]    #con local y visitante me refiero a los partidos
         visitante=partidos[partidos["equipo2"] == eid] #en donde el equipo fue el equipo 1 o el 2
 
-        pj=len(local) + len(visitante)
+        pj=len(local)+len(visitante)
         gf=int(local["goles1"].sum()) + int(visitante["goles2"].sum())
         gc=int(local["goles2"].sum()) + int(visitante["goles1"].sum())
 
@@ -48,8 +48,8 @@ def obtener_pais(id_eq):
 
 
 def ingresar_equipo(id_eq, pais, grupo, prefijo, confederacion):
-    df = pd.read_excel("data/equipos.xlsx") #Lee el dataframe
-    df.loc[len(df)] = [id_eq, pais, grupo, prefijo, confederacion] #Guarda en el dataframe
+    df=pd.read_excel("data/equipos.xlsx") #Lee el dataframe
+    df.loc[len(df)]=[id_eq, pais, grupo, prefijo, confederacion] #Guarda en el dataframe
     df.to_excel("data/equipos.xlsx", index=False) #Guarda en el excel sin indice
 
 def ver_equipos():
@@ -208,21 +208,24 @@ def informe_todos_los_grupos():  #Informe 5
     return resultado   #Retorna entonces un diccionario de dfs de grupos ordenado por grupo, con cada grupo ordenado
 
 
+
+#Despues de la fase de grupos
+
 def cerrar_configuracion():
     archivo=open("data/config.txt", "w")   #abrir en modo write crea el archivo si no existe
     archivo.write("cerrada")
     archivo.close()
 
-def configuracion_cerrada():
+def configuracion_cerrada():  #retorna si esta o no cerrada la config
     if not os.path.exists("data/config.txt"):    
         return False
     archivo=open("data/config.txt", "r")  
     contenido=archivo.read()
     archivo.close()
-    return contenido=="cerrada"
+    return contenido=="cerrada"  
 
 
-def grupos_completos():  #con esta funcion verifico si ya fueron jugados los partidos de la fase de grupo para comenar con la fase eliminatoria
+def grupos_completos():  #con esta funcion verifico si ya fueron jugados los partidos de la fase de grupo para comenzar con la fase eliminatoria
     df=pd.read_excel("data/partidos.xlsx")
     partidos_grupos=df[df["fase"] == "Grupos"]   #df con los partidos de la fase de grupos
     
@@ -230,4 +233,42 @@ def grupos_completos():  #con esta funcion verifico si ya fueron jugados los par
         return False  #si no hay partidos cargados
     
     #si ya se jugaron todos, retorna true
-    return int(partidos_grupos["jugado"].sum())==len(partidos_grupos)
+    return int(partidos_grupos["jugado"].sum())==len(partidos_grupos)   #me sirve para saber si mostrar o no el boton de la siguiente fase
+
+
+def calcular_clasificados():
+    df=calcular_stats()   #calcular stats me da la informacion necesaria para ordenar
+    grupos=sorted(df["grupo"].unique())  #grupos ordenadamente
+
+    primeros=[]   #se van a guardar las filas completas de todos los primeros, segundos y terceros
+    segundos=[]
+    terceros=[]
+
+    for grupo in grupos:
+        df_grupo=df[df["grupo"]==grupo].sort_values(     #filas ordenadas que contiene los equipos de cada grupo
+            by=["puntos", "dg", "gf", "prefijo"],
+            ascending=[False, False, False, False]
+        )
+
+        primeros.append(df_grupo.iloc[0])   #el primero del grupo
+        segundos.append(df_grupo.iloc[1])   #el segundo del grupo
+        terceros.append(df_grupo.iloc[2])   #el tercero del grupo
+
+    #convertimos las listas a dataframes
+    df_primeros=pd.DataFrame(primeros).reset_index(drop=True)
+    df_segundos=pd.DataFrame(segundos).reset_index(drop=True)
+    df_terceros=pd.DataFrame(terceros).reset_index(drop=True)
+
+    #ordenamos los terceros por los 4 criterios y tomamos los 8 mejores
+    df_terceros=df_terceros.sort_values(
+        by=["puntos", "dg", "gf", "prefijo"],
+        ascending=[False, False, False, False]
+    )
+    df_terceros=df_terceros[:8]
+    df_terceros=df_terceros.reset_index(drop=True)   #cuando se los devuelve al df, los indices se resetean
+
+    return {
+        "primeros": df_primeros,
+        "segundos": df_segundos,
+        "terceros":df_terceros
+    }
