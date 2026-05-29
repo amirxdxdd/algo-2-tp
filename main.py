@@ -95,7 +95,7 @@ def abrir_ingresar_equipo():   #Todo igual a las otras ventanas
 def abrir_ingresar_partido():
     ventana_partido=ctk.CTkToplevel(ventana)   #Igual al anterior
     ventana_partido.title("Ingresar Partido")
-    ventana_partido.geometry("700x940")
+    ventana_partido.geometry("700x760")
     ventana_partido.resizable(False, False)
 
     header_partido=ctk.CTkFrame(ventana_partido, corner_radius=0, fg_color="#1a1a2e")
@@ -119,14 +119,14 @@ def abrir_ingresar_partido():
             frame_form,
             text=campo,
             anchor="w"
-        ).pack(fill="x", pady=(8, 2))
+        ).pack(fill="x", pady=(1, 1))
 
         entrada = ctk.CTkEntry(frame_form, width=340)   #Cuadro para ingresar datos
         entrada.pack()
         entradas[campo]=entrada
 
     label_mensaje=ctk.CTkLabel(ventana_partido, text="", text_color="#aaaaaa")
-    label_mensaje.pack(pady=(10, 4))
+    label_mensaje.pack(pady=(1, 1))
 
     def guardar():
         fecha=entradas["Fecha (DD/MM/AAAA)"].get().strip()
@@ -171,7 +171,7 @@ def abrir_ingresar_partido():
         text="Guardar Partido",
         width=200,
         command=guardar
-    ).pack(pady=4)
+    ).pack(pady=1)
 
     ctk.CTkButton(
         ventana_partido,
@@ -180,7 +180,7 @@ def abrir_ingresar_partido():
         fg_color="transparent",
         border_width=1,
         command=ventana_partido.destroy
-    ).pack(pady=4)
+    ).pack(pady=1)
 
     ventana_partido.grab_set()
 
