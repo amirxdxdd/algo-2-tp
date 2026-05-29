@@ -1,5 +1,5 @@
 import pandas as pd
-def calcular_stats():   #Para la fase de grupos, ayuda a hacer calculos
+def calcular_stats():   #Para la fase de grupos, devuelve una tabla similar a la de equipos, pero con la informacion necesaria para hacer calculos
     equipos=pd.read_excel("data/equipos.xlsx")
     partidos=pd.read_excel("data/partidos.xlsx")
     stats = equipos.copy()  #copiamos la tabla de equipos
@@ -149,3 +149,18 @@ def informe_proximo_partido(pais_buscado, fecha_buscada):   #Informe 4
     proximo["fecha"]=proximo["fecha"].strftime("%d/%m/%Y")
 
     return proximo
+
+
+def informe_todos_los_grupos():  #Informe 5
+    df=calcular_stats()
+    grupos=sorted(df["grupo"].unique())  #obtiene los grupos sin repetir en orden
+    resultado={}
+
+    for grupo in grupos:   #Ordena los equipos en los grupos
+        df_grupo = df[df["grupo"]==grupo].sort_values(
+            by=["puntos", "dg", "gf", "prefijo"],
+            ascending=[False, False, False, False]
+        )
+        resultado[grupo]=df_grupo  #guardamos cada grupo en el diccionario
+
+    return resultado   #Retorna entonces un diccionario de dfs de grupos ordenado por grupo, con cada grupo ordenado

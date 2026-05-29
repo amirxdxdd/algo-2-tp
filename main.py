@@ -600,6 +600,7 @@ def abrir_informe3():
 
 
 
+
 def abrir_informe4():
     ventana_inf4 = ctk.CTkToplevel(ventana)
     ventana_inf4.title("Proximo partido")
@@ -685,7 +686,53 @@ def abrir_informe4():
 
 
 def abrir_informe5():
-    print("Informe 5")
+    ventana_inf5=ctk.CTkToplevel(ventana)
+    ventana_inf5.title("Todos los grupos")
+    ventana_inf5.geometry("600x500")
+    ventana_inf5.resizable(False, False)
+
+    header_inf5 = ctk.CTkFrame(ventana_inf5, corner_radius=0, fg_color="#1a1a2e")
+    header_inf5.pack(fill="x")
+
+    ctk.CTkLabel(
+        header_inf5,
+        text="Tabla de Todos los Grupos",
+        font=ctk.CTkFont(size=18, weight="bold"),
+        text_color="#e94560"
+    ).pack(pady=14)
+
+    textbox=ctk.CTkTextbox(ventana_inf5, width=540, height=360, font=ctk.CTkFont(family="Courier", size=12))
+    textbox.pack(pady=20)
+
+    grupos=informe_todos_los_grupos()
+
+    encabezado=f"{'POS':<5} {'PAIS':<20} {'PJ':<5} {'GF':<5} {'GC':<5} {'DG':<5} {'PTS':<5}\n"
+
+    for grupo in grupos:
+        df=grupos[grupo]
+        textbox.insert("end", f"Grupo {grupo}\n")
+        textbox.insert("end", "─" * 50 + "\n")
+        textbox.insert("end", encabezado)
+        textbox.insert("end", "─" * 50 + "\n")
+
+        for i in range(len(df)):
+            fila = df.iloc[i]
+            textbox.insert("end", f"{i+1:<5} {str(fila['pais']):<20} {int(fila['pj']):<5} {int(fila['gf']):<5} {int(fila['gc']):<5} {int(fila['dg']):<5} {int(fila['puntos']):<5}\n")
+
+        textbox.insert("end", "\n")  #espacio entre grupos
+
+    textbox.configure(state="disabled")
+
+    ctk.CTkButton(
+        ventana_inf5,
+        text="Volver",
+        width=150,
+        fg_color="transparent",
+        border_width=1,
+        command=ventana_inf5.destroy
+    ).pack()
+
+    ventana_inf5.grab_set()
 
 
 
