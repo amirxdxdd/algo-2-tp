@@ -1,4 +1,5 @@
 import pandas as pd
+import os
 def calcular_stats():   #Para la fase de grupos, devuelve una tabla similar a la de equipos, pero con la informacion necesaria para hacer calculos
     equipos=pd.read_excel("data/equipos.xlsx")
     partidos=pd.read_excel("data/partidos.xlsx")
@@ -103,9 +104,10 @@ def registrar_resultado(fecha, pais1, pais2, goles1, goles2, penales1, penales2)
     df.loc[indice, "goles2"]=goles2
     df.loc[indice, "penales1"]=penales1
     df.loc[indice, "penales2"]=penales2
+    df.loc[indice, "jugado"]=1 
 
     df.to_excel("data/partidos.xlsx", index=False)
-    return "ok"
+    return "ok"   #con esto se registra el resultado
 
 
 
@@ -204,3 +206,28 @@ def informe_todos_los_grupos():  #Informe 5
         resultado[grupo]=df_grupo  #guardamos cada grupo en el diccionario
 
     return resultado   #Retorna entonces un diccionario de dfs de grupos ordenado por grupo, con cada grupo ordenado
+
+
+def cerrar_configuracion():
+    archivo=open("data/config.txt", "w")   #abrir en modo write crea el archivo si no existe
+    archivo.write("cerrada")
+    archivo.close()
+
+def configuracion_cerrada():
+    if not os.path.exists("data/config.txt"):    
+        return False
+    archivo=open("data/config.txt", "r")  
+    contenido=archivo.read()
+    archivo.close()
+    return contenido=="cerrada"
+
+
+def grupos_completos():  #con esta funcion verifico si ya fueron jugados los partidos de la fase de grupo para comenar con la fase eliminatoria
+    df=pd.read_excel("data/partidos.xlsx")
+    partidos_grupos=df[df["fase"] == "Grupos"]   #df con los partidos de la fase de grupos
+    
+    if len(partidos_grupos)==0:
+        return False  #si no hay partidos cargados
+    
+    #si ya se jugaron todos, retorna true
+    return int(partidos_grupos["jugado"].sum())==len(partidos_grupos)

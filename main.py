@@ -258,8 +258,8 @@ def abrir_ver_partidos():
 def abrir_configuracion():
     ventana_config = ctk.CTkToplevel(ventana) #crea una ventana secundaria encima de la principal
     ventana_config.title("Configuración del Torneo")
-    ventana_config.geometry("600x460")
-    ventana_config.resizable(False, False)  #se me bugea en linux cambiar la resolucion de esta ventana, bloqueo para evitar
+    ventana_config.geometry("600x520")
+    ventana_config.resizable(False, False)  #cambiar la resolucion se me bugea desde linux
     
     
     #nuevo header, igual al menu principal
@@ -277,7 +277,15 @@ def abrir_configuracion():
     frame_config = ctk.CTkFrame(ventana_config, fg_color="transparent")
     frame_config.pack(expand=True)
 
-    opciones_config = [
+    cerrada=configuracion_cerrada()  #verifica si la configuracion esta cerrada o no
+
+    if cerrada:    #dependiendo si esta o no cerrada, los botones de configuracion se habilitan o deshabilitan
+        estado="disabled"
+    else:
+        estado="normal"
+
+
+    opciones_config=[
         ("Ingresar Equipo", abrir_ingresar_equipo),   #cada tupla tiene el nombre y la funcion que ejecuta
         ("Ingresar Partido", abrir_ingresar_partido),
         ("Ver Equipos", abrir_ver_equipos),
@@ -292,8 +300,34 @@ def abrir_configuracion():
             width=300,
             height=44,
             font=ctk.CTkFont(size=13),
-            command=comando   #para darle click y ejecutar la funcion
+            command=comando,   #para darle click y ejecutar la funcion
+            state=estado  #si esta cerrada la config no funcionaran los botones
         ).pack(pady=7)
+
+    if not cerrada:
+        def cerrar():
+            cerrar_configuracion()   #cambio el txt a cerrado
+            ventana_config.destroy()  #estas 2 lineas refrescan la ventana, actualiando el estado
+            abrir_configuracion()
+        
+        ctk.CTkButton(
+            frame_config,
+            text="Cerrar Configuración",  #el boton solo aparece si no se cerro
+            width=300,
+            height=44,
+            font=ctk.CTkFont(size=13),
+            fg_color="#e94560",
+            command=cerrar
+        ).pack(pady=7)
+    else:
+        ctk.CTkLabel(   #si ce cerro la config aparece este mensaje
+            frame_config,
+            text="La configuracion esta cerrada, no se pueden realizar cambios",
+            text_color="#e94560",
+            font=ctk.CTkFont(size=12)
+        ).pack(pady=7)
+
+    
 
     ventana_config.grab_set()  #bloquea la ventana principal mientras esta abierto configuracion
 
