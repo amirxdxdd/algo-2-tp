@@ -44,6 +44,8 @@ def obtener_pais(id_eq):
         return id_eq  #si no encuentra el equipo con ese id, devuelve el id
     return resultado.iloc[0]["pais"]   #accede a la primera fila, columna "pais"
 
+
+
 def ingresar_equipo(id_eq, pais, grupo, prefijo, confederacion):
     df = pd.read_excel("data/equipos.xlsx") #Lee el dataframe
     df.loc[len(df)] = [id_eq, pais, grupo, prefijo, confederacion] #Guarda en el dataframe
@@ -92,3 +94,58 @@ def informe_tabla_grupo(grupo):   #Informe 2
         ascending=[False, False, False, False]
     )
     return df
+
+
+
+def informe_resultados_equipo(pais_buscado):  #Informe 3
+    partidos=pd.read_excel("data/partidos.xlsx")
+    equipos=pd.read_excel("data/equipos.xlsx")
+
+    eq=equipos[equipos["pais"].str.upper() == pais_buscado.upper()]  #Obtiene la fila del equipo
+    
+    if len(eq)==0:
+        return None  #por si el pais no existe
+
+    id_eq=eq.iloc[0]["id"]
+
+    todos = partidos[(partidos["equipo1"] == id_eq) | (partidos["equipo2"] == id_eq)]  #El | es el or logico, como en c
+    todos = todos.sort_values(by="fecha")  #para que se muestre ordenado
+
+    return todos
+
+
+
+def informe_proximo_partido(pais_buscado, fecha_buscada):   #Informe 4
+    partidos=pd.read_excel("data/partidos.xlsx")
+    equipos=pd.read_excel("data/equipos.xlsx")
+
+    eq=equipos[equipos["pais"].str.upper() == pais_buscado.upper()]
+    print(f"Equipo encontrado: {eq}")
+
+    if len(eq)==0:
+        return None  #por si el pais no existe
+
+    id_eq=eq.iloc[0]["id"]
+
+    #buscamos todos los partidos donde jugó este equipo, como equipo 1 o 2 (local o visitante)
+    todos=partidos[(partidos["equipo1"]==id_eq) | (partidos["equipo2"]==id_eq)]
+
+    #convertimos las fechas a formato datetime para poder comparar
+    todos=todos.copy()
+    todos["fecha"]=pd.to_datetime(todos["fecha"], dayfirst=True)
+    fecha_buscada_dt=pd.to_datetime(fecha_buscada, dayfirst=True)
+
+    #filtramos los partidos que sean en la fecha buscada o despues
+    proximos=todos[todos["fecha"]>=fecha_buscada_dt]
+
+    if len(proximos)==0:
+        return None  #Si no hay ningun partido proximo
+
+    #ordenamos y tomamos el primero
+    proximos=proximos.sort_values(by="fecha")
+    proximo=proximos.iloc[0].copy()
+
+    #convertimos la fecha de vuelta a texto para mostrarla
+    proximo["fecha"]=proximo["fecha"].strftime("%d/%m/%Y")
+
+    return proximo

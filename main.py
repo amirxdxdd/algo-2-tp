@@ -108,7 +108,7 @@ def abrir_ingresar_partido():
         text_color="#e94560"
     ).pack(pady=14)
 
-    frame_form = ctk.CTkFrame(ventana_partido, fg_color="transparent")
+    frame_form=ctk.CTkFrame(ventana_partido, fg_color="transparent")
     frame_form.pack(padx=40, pady=20, fill="x")
 
     campos = ["Fecha (DD/MM/AAAA)", "Hora (HH:MM)", "Lugar", "Equipo 1", "Equipo 2", "Goles Equipo 1", "Goles Equipo 2", "Penales Equipo 1", "Penales Equipo 2", "Fase"]
@@ -123,22 +123,22 @@ def abrir_ingresar_partido():
 
         entrada = ctk.CTkEntry(frame_form, width=340)   #Cuadro para ingresar datos
         entrada.pack()
-        entradas[campo] = entrada
+        entradas[campo]=entrada
 
-    label_mensaje = ctk.CTkLabel(ventana_partido, text="", text_color="#aaaaaa")
+    label_mensaje=ctk.CTkLabel(ventana_partido, text="", text_color="#aaaaaa")
     label_mensaje.pack(pady=(10, 4))
 
     def guardar():
-        fecha  = entradas["Fecha (DD/MM/AAAA)"].get().strip()
-        hora   = entradas["Hora (HH:MM)"].get().strip()
-        lugar  = entradas["Lugar"].get().strip()
-        pais1  = entradas["Equipo 1"].get().strip()
-        pais2  = entradas["Equipo 2"].get().strip()
-        g1     = entradas["Goles Equipo 1"].get().strip()
-        g2     = entradas["Goles Equipo 2"].get().strip()
-        pen1   = entradas["Penales Equipo 1"].get().strip()
-        pen2   = entradas["Penales Equipo 2"].get().strip()
-        fase   = entradas["Fase"].get().strip()
+        fecha=entradas["Fecha (DD/MM/AAAA)"].get().strip()
+        hora=entradas["Hora (HH:MM)"].get().strip()
+        lugar=entradas["Lugar"].get().strip()
+        pais1=entradas["Equipo 1"].get().strip()
+        pais2=entradas["Equipo 2"].get().strip()
+        g1=entradas["Goles Equipo 1"].get().strip()
+        g2=entradas["Goles Equipo 2"].get().strip()
+        pen1=entradas["Penales Equipo 1"].get().strip()
+        pen2=entradas["Penales Equipo 2"].get().strip()
+        fase=entradas["Fase"].get().strip()
 
         #verificar que no hayan campos vacios
         if fecha=="" or hora=="" or lugar=="" or pais1=="" or pais2=="" or g1=="" or g2=="" or pen1=="" or pen2=="" or fase=="":
@@ -151,16 +151,16 @@ def abrir_ingresar_partido():
             return
 
         #buscar el ID rapidin (No quiero hacer una funcion porque no volvere a usar esto)
-        equipos = pd.read_excel("data/equipos.xlsx")
-        eq1 = equipos[equipos["pais"].str.upper() == pais1.upper()]
-        eq2 = equipos[equipos["pais"].str.upper() == pais2.upper()]
+        equipos=pd.read_excel("data/equipos.xlsx")
+        eq1=equipos[equipos["pais"].str.upper()==pais1.upper()]
+        eq2=equipos[equipos["pais"].str.upper()==pais2.upper()]
 
-        if len(eq1) == 0 or len(eq2) == 0:
+        if len(eq1)==0 or len(eq2)==0:
             label_mensaje.configure(text="Uno de los equipos no existe.", text_color="#e94560")
             return
 
-        id_eq1 = eq1.iloc[0]["id"]
-        id_eq2 = eq2.iloc[0]["id"]
+        id_eq1=eq1.iloc[0]["id"]
+        id_eq2=eq2.iloc[0]["id"]
 
         ingresar_partido(fecha, hora, lugar, id_eq1, id_eq2, int(g1), int(g2), int(pen1), int(pen2), fase)
         label_mensaje.configure(text="Partido guardado correctamente.", text_color="#44bb77")
@@ -487,7 +487,7 @@ def abrir_informe2():
         if df is None:
             textbox.insert("end", f"No existe el grupo {grupo.upper()}")
         else:
-            textbox.insert("end", f"Tabla de posiciones — Grupo {grupo.upper()}\n")
+            textbox.insert("end", f"Grupo {grupo.upper()}\n")
             textbox.insert("end", "─" * 55 + "\n")
             textbox.insert("end", f"{'POS':<5} {'PAIS':<20} {'PJ':<5} {'GF':<5} {'GC':<5} {'DG':<5} {'PTS':<5}\n")
             textbox.insert("end", "─" * 55 + "\n")
@@ -521,10 +521,168 @@ def abrir_informe2():
 
 
 def abrir_informe3():
-    print("Informe 3")
+    ventana_inf3=ctk.CTkToplevel(ventana)
+    ventana_inf3.title("Resultados por equipo")
+    ventana_inf3.geometry("600x500")
+    ventana_inf3.resizable(False, False)
+
+    header_inf3=ctk.CTkFrame(ventana_inf3, corner_radius=0, fg_color="#1a1a2e")
+    header_inf3.pack(fill="x")
+
+    ctk.CTkLabel(
+        header_inf3,
+        text="Resultados por Equipo",
+        font=ctk.CTkFont(size=18, weight="bold"),
+        text_color="#e94560"
+    ).pack(pady=14)
+
+    frame_input=ctk.CTkFrame(ventana_inf3, fg_color="transparent")
+    frame_input.pack(pady=20)
+
+    ctk.CTkLabel(
+        frame_input,
+        text="Pais:",
+    ).pack(side="left", padx=(0, 10))
+
+    entrada_pais=ctk.CTkEntry(frame_input, width=150)
+    entrada_pais.pack(side="left")
+
+    textbox=ctk.CTkTextbox(ventana_inf3, width=540, height=280, font=ctk.CTkFont(family="Courier", size=12))
+    textbox.pack(pady=(0, 10))
+    textbox.configure(state="disabled")
+
+    def buscar():
+        pais_buscado=entrada_pais.get().strip()
+
+        if pais_buscado=="":
+            return
+
+        df=informe_resultados_equipo(pais_buscado)
+
+        textbox.configure(state="normal")
+        textbox.delete("1.0", "end")
+
+        if df is None:
+            textbox.insert("end", f"No existe el equipo {pais_buscado}")
+        elif len(df) == 0:
+            textbox.insert("end", f"{pais_buscado.upper()} no tiene partidos registrados")
+        else:
+            textbox.insert("end", f"Resultados de {pais_buscado.upper()}\n")
+            textbox.insert("end", "─"*50 + "\n\n")
+
+            for i in range(len(df)):   #Igualito al informe 1
+                fila=df.iloc[i]
+                pais1=obtener_pais(fila["equipo1"])
+                pais2=obtener_pais(fila["equipo2"])
+                textbox.insert("end", f"{fila['fecha']} — {fila['fase']}\n")
+                textbox.insert("end", f"  {pais1}  {int(fila['goles1'])} : {int(fila['goles2'])}  {pais2}\n")
+                textbox.insert("end", f"  {fila['lugar']}\n\n")
+
+        textbox.configure(state="disabled")
+
+    ctk.CTkButton(
+        ventana_inf3,
+        text="Buscar",
+        width=150,
+        command=buscar
+    ).pack(pady=(0, 8))
+
+    ctk.CTkButton(
+        ventana_inf3,
+        text="Volver",
+        width=150,
+        fg_color="transparent",
+        border_width=1,
+        command=ventana_inf3.destroy
+    ).pack()
+
+    ventana_inf3.grab_set()
+
+
 
 def abrir_informe4():
-    print("Informe 4")
+    ventana_inf4 = ctk.CTkToplevel(ventana)
+    ventana_inf4.title("Proximo partido")
+    ventana_inf4.geometry("600x500")
+    ventana_inf4.resizable(False, False)
+
+    header_inf4 = ctk.CTkFrame(ventana_inf4, corner_radius=0, fg_color="#1a1a2e")
+    header_inf4.pack(fill="x")
+
+    ctk.CTkLabel(
+        header_inf4,
+        text="Proximo Partido por Equipo",
+        font=ctk.CTkFont(size=18, weight="bold"),
+        text_color="#e94560"
+    ).pack(pady=14)
+
+    frame_input = ctk.CTkFrame(ventana_inf4, fg_color="transparent")
+    frame_input.pack(pady=20)
+
+    #pide el pais
+    ctk.CTkLabel(frame_input, text="Pais:").grid(row=0, column=0, padx=(0, 10), pady=6)
+    entrada_pais = ctk.CTkEntry(frame_input, width=150)         #grid es similar a pack pero maneja filas y columnas
+    entrada_pais.grid(row=0, column=1)
+
+    #pide la fecha
+    ctk.CTkLabel(frame_input, text="Fecha (DD/MM/AAAA):").grid(row=1, column=0, padx=(0, 10), pady=6)
+    entrada_fecha = ctk.CTkEntry(frame_input, width=150)
+    entrada_fecha.grid(row=1, column=1)
+
+    textbox = ctk.CTkTextbox(ventana_inf4, width=540, height=240, font=ctk.CTkFont(family="Courier", size=12))
+    textbox.pack(pady=(0, 10))
+    textbox.configure(state="disabled")
+
+    def buscar():
+        pais_buscado  = entrada_pais.get().strip()
+        fecha_buscada = entrada_fecha.get().strip()
+
+        if pais_buscado == "" or fecha_buscada == "":
+            return
+
+        resultado=informe_proximo_partido(pais_buscado, fecha_buscada)
+
+        textbox.configure(state="normal")
+        textbox.delete("1.0", "end")
+
+        if resultado is None:
+            textbox.insert("end", f"No existe el equipo {pais_buscado}")
+
+        else:
+            pais1 = obtener_pais(resultado["equipo1"])
+            pais2 = obtener_pais(resultado["equipo2"])
+            textbox.insert("end", f"Próximo partido de {pais_buscado.upper()}\n")
+            textbox.insert("end", "─" * 50 + "\n\n")
+            textbox.insert("end", f"Fecha:  {resultado['fecha']}\n")
+            textbox.insert("end", f"Hora:   {resultado['hora']}\n")
+            textbox.insert("end", f"Lugar:  {resultado['lugar']}\n")
+            textbox.insert("end", f"Fase:   {resultado['fase']}\n\n")
+            textbox.insert("end", f"  {pais1}  vs  {pais2}\n\n")
+
+        textbox.configure(state="disabled")
+
+    ctk.CTkButton(
+        ventana_inf4,
+        text="Buscar",
+        width=150,
+        command=buscar
+    ).pack(pady=(0, 8))
+
+    ctk.CTkButton(
+        ventana_inf4,
+        text="Volver",
+        width=150,
+        fg_color="transparent",
+        border_width=1,
+        command=ventana_inf4.destroy
+    ).pack()
+
+    ventana_inf4.grab_set()
+
+
+
+
+
 
 def abrir_informe5():
     print("Informe 5")
