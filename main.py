@@ -289,9 +289,9 @@ def abrir_configuracion():
         ("Ingresar Equipo", abrir_ingresar_equipo),   #cada tupla tiene el nombre y la funcion que ejecuta
         ("Ingresar Partido", abrir_ingresar_partido),
         ("Ver Equipos", abrir_ver_equipos),
-        ("Ver Partidos", abrir_ver_partidos),
-        ("Volver", ventana_config.destroy),  #destroy cierra solo esta ventana
+        ("Ver Partidos", abrir_ver_partidos)  
     ]
+    #El boton volver lo puse aparte porque cuando cierre la configuracion desabilitare todos los botones
 
     for texto, comando in opciones_config:    #Esto es solo para crear los botones
         ctk.CTkButton(
@@ -303,6 +303,17 @@ def abrir_configuracion():
             command=comando,   #para darle click y ejecutar la funcion
             state=estado  #si esta cerrada la config no funcionaran los botones
         ).pack(pady=7)
+
+    ctk.CTkButton(
+        frame_config,
+        text="Volver",
+        width=300,
+        height=44,
+        font=ctk.CTkFont(size=13),
+        fg_color="transparent",
+        border_width=1,
+        command=ventana_config.destroy   #boton volver, destroy cierra solo esta ventana
+    ).pack(pady=7)
 
     if not cerrada:
         def cerrar():
