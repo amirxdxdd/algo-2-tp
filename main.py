@@ -4,7 +4,7 @@ from logica import *
 
 
 def actualizar_hora():
-    ahora = datetime.now().strftime("%d/%m/%Y  %H:%M:%S") #Convierte a str la fecha y hora actual y guarda en ahora
+    ahora=datetime.now().strftime("%d/%m/%Y  %H:%M:%S") #Convierte a str la fecha y hora actual y guarda en ahora
     label_hora.configure(text=ahora)  #Cambia la etiqueta a lo que hay en ahora  
     ventana.after(1000, actualizar_hora)  #Actualiza 1 segundo despues
 
@@ -410,6 +410,53 @@ def abrir_resultados():
         command=guardar
     ).pack(pady=4)
 
+
+
+    def ejecutar_y_cerrar(funcion):   #ejecuta la funcion, cierra la ventana y la vuelve a abrir
+        funcion()
+        ventana_res.destroy()
+        abrir_resultados()
+
+
+    #cada funcion crea los partidos de su fase
+    def gen_dieciseisavos():
+        ejecutar_y_cerrar(generar_dieciseisavos)
+
+    def gen_octavos():
+        ejecutar_y_cerrar(generar_octavos)
+
+    def gen_cuartos():
+        ejecutar_y_cerrar(generar_cuartos)
+
+    def gen_semifinal():
+        ejecutar_y_cerrar(generar_semifinal)
+
+    def gen_final():
+        ejecutar_y_cerrar(generar_final)
+
+    #los botones apareceran solo si la fase anterior se termino, y apareceran solo hasta ser presionados
+    if grupos_completos() and not hay_partidos_de_fase("Dieciseisavos"):
+        ctk.CTkButton(ventana_res, text="Generar Dieciseisavos", width=200,
+            fg_color="#44bb77", command=gen_dieciseisavos).pack(pady=4)
+
+    if ronda_completa("Dieciseisavos") and not hay_partidos_de_fase("Octavos"):
+        ctk.CTkButton(ventana_res, text="Generar Octavos", width=200,
+            fg_color="#44bb77", command=gen_octavos).pack(pady=4)
+
+    if ronda_completa("Octavos") and not hay_partidos_de_fase("Cuartos"):
+        ctk.CTkButton(ventana_res, text="Generar Cuartos", width=200,
+            fg_color="#44bb77", command=gen_cuartos).pack(pady=4)
+
+    if ronda_completa("Cuartos") and not hay_partidos_de_fase("Semifinal"):
+        ctk.CTkButton(ventana_res, text="Generar Semifinal", width=200,
+            fg_color="#44bb77", command=gen_semifinal).pack(pady=4)
+
+    if ronda_completa("Semifinal") and not hay_partidos_de_fase("Final"):
+        ctk.CTkButton(ventana_res, text="Generar Final", width=200,
+            fg_color="#44bb77", command=gen_final).pack(pady=4)
+        
+
+
     ctk.CTkButton(
         ventana_res,
         text="Volver",
@@ -422,7 +469,7 @@ def abrir_resultados():
     ventana_res.grab_set()
 
 
-
+    
 
 
 
@@ -664,26 +711,35 @@ def abrir_informe3():
         if pais_buscado=="":
             return
 
-        df=informe_resultados_equipo(pais_buscado)
+        df,avance=informe_resultados_equipo(pais_buscado)
 
         textbox.configure(state="normal")
         textbox.delete("1.0", "end")
 
         if df is None:
             textbox.insert("end", f"No existe el equipo {pais_buscado}")
-        elif len(df) == 0:
+        elif len(df)==0:
             textbox.insert("end", f"{pais_buscado.upper()} no tiene partidos registrados")
         else:
             textbox.insert("end", f"Resultados de {pais_buscado.upper()}\n")
             textbox.insert("end", "─"*50 + "\n\n")
 
-            for i in range(len(df)):   #Igualito al informe 1
+            for i in range(len(df)):   #similar al informe 1
                 fila=df.iloc[i]
                 pais1=obtener_pais(fila["equipo1"])
                 pais2=obtener_pais(fila["equipo2"])
                 textbox.insert("end", f"{fila['fecha']} — {fila['fase']}\n")
                 textbox.insert("end", f"  {pais1}  {int(fila['goles1'])} : {int(fila['goles2'])}  {pais2}\n")
                 textbox.insert("end", f"  {fila['lugar']}\n\n")
+            
+            if avance=="Campeon":
+                textbox.insert("end", "Campeon del Mundial\n")
+            elif avance=="Vicecampeon":
+                textbox.insert("end", "Vicecampeon del Mundial\n")
+            elif avance=="Fase de Grupos":
+                textbox.insert("end", "Eliminado en Fase de Grupos\n")
+            else:
+                textbox.insert("end", f"Clasificado a {avance}\n")
 
         textbox.configure(state="disabled")
 

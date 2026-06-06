@@ -111,7 +111,34 @@ def registrar_resultado(fecha, pais1, pais2, goles1, goles2, penales1, penales2)
 
 
 
+def avance_maximo(id_eq):   #maximo avance de un equipo
+    df=pd.read_excel("data/partidos.xlsx")
 
+    #orden de fases de menor a mayor
+    fases=["Grupos", "Dieciseisavos", "Octavos", "Cuartos", "Semifinal", "Final"]
+
+    #verificamos si el equipo jugo en cada fase
+    ultimo_avance="Fase de Grupos"
+
+    for fase in fases:
+        partidos_fase=df[
+            ((df["equipo1"]==id_eq) | (df["equipo2"]==id_eq)) &   #filtrar para que sea eq1 o 2, la fase y que ya se haya jugado
+            (df["fase"]==fase) &
+            (df["jugado"]==1)
+        ]
+        if len(partidos_fase)>0:
+            ultimo_avance=fase
+
+    #si llego a la final, verificamos si gano o perdio
+    final=df[(df["fase"]=="Final") & (df["jugado"]==1)]
+    if len(final)>0:
+        fila_final=final.iloc[0]
+        if ganador_partido(fila_final)==id_eq:
+            return "Campeon"
+        elif fila_final["equipo1"]==id_eq or fila_final["equipo2"]==id_eq:
+            return "Vicecampeon"
+
+    return ultimo_avance
 
 
 
@@ -143,17 +170,18 @@ def informe_resultados_equipo(pais_buscado):  #Informe 3
     partidos=pd.read_excel("data/partidos.xlsx")
     equipos=pd.read_excel("data/equipos.xlsx")
 
-    eq=equipos[equipos["pais"].str.upper() == pais_buscado.upper()]  #Obtiene la fila del equipo
+    eq=equipos[equipos["pais"].str.upper()==pais_buscado.upper()]  #Obtiene la fila del equipo
     
     if len(eq)==0:
-        return None  #por si el pais no existe
+        return None, None  #por si el pais no existe
 
     id_eq=eq.iloc[0]["id"]
 
-    todos = partidos[(partidos["equipo1"] == id_eq) | (partidos["equipo2"] == id_eq)]  #El | es el or logico, como en c
-    todos = todos.sort_values(by="fecha")  #para que se muestre ordenado
+    todos=partidos[(partidos["equipo1"] == id_eq) | (partidos["equipo2"] == id_eq)]  #El | es el or logico, como en c
+    todos=todos.sort_values(by="fecha")  #para que se muestre ordenado
+    avance=avance_maximo(id_eq)
 
-    return todos
+    return todos, avance   #retorno la tupla con todos los partidos y el ultimo avance
 
 
 
@@ -233,7 +261,45 @@ def grupos_completos():  #con esta funcion verifico si ya fueron jugados los par
         return False  #si no hay partidos cargados
     
     #si ya se jugaron todos, retorna true
-    return int(partidos_grupos["jugado"].sum())==len(partidos_grupos)   #me sirve para saber si mostrar o no el boton de la siguiente fase
+    return int(partidos_grupos["jugado"].sum())==len(partidos_grupos)   #sirve para saber si mostrar o no el boton de la siguiente fase
+
+
+
+#fase eliminatoria
+
+
+def hay_partidos_de_fase(fase):
+    df=pd.read_excel("data/partidos.xlsx")
+    return len(df[df["fase"]==fase])>0   #retorna true o false si hay o no partidos de cierta fase, para no generar 2 veces los mismos partidos
+
+
+def ronda_completa(fase):
+    df=pd.read_excel("data/partidos.xlsx")
+    partidos_fase=df[df["fase"]==fase]
+    if len(partidos_fase)==0:
+        return False
+    return int(partidos_fase["jugado"].sum())==len(partidos_fase)   #True o false si ya se jugaron todos los partidos de cierta fase, para saber si habilitar o no el boton de la siguiente ronda
+
+
+
+def ganador_partido(fila):   #ganador de un partido, recibe la fila completa del partido, retorna su id de equipo
+    if fila["goles1"]>fila["goles2"]:
+        return fila["equipo1"]
+    elif fila["goles2"]>fila["goles1"]:
+        return fila["equipo2"]
+    else:
+        if fila["penales1"]>fila["penales2"]:
+            return fila["equipo1"]
+        else:
+            return fila["equipo2"]
+
+
+
+def ganador_partido_por_id(id_partido):   #recibe el id del partido y utiliza la anterior funcion para darme el ganador de ese partido (su id de equipo)
+    df = pd.read_excel("data/partidos.xlsx")
+    fila = df[df["id_partido"] == id_partido].iloc[0]
+    return ganador_partido(fila)
+
 
 
 def calcular_clasificados():
@@ -264,7 +330,7 @@ def calcular_clasificados():
         by=["puntos", "dg", "gf", "prefijo"],
         ascending=[False, False, False, False]
     )
-    df_terceros=df_terceros[:8]
+    df_terceros=df_terceros[:8]  #los 8 mejores terceros
     df_terceros=df_terceros.reset_index(drop=True)   #cuando se los devuelve al df, los indices se resetean
 
     return {
@@ -272,3 +338,106 @@ def calcular_clasificados():
         "segundos": df_segundos,
         "terceros":df_terceros
     }
+
+
+
+def generar_dieciseisavos():
+    clasificados=calcular_clasificados()   #obtiene los primeros, segundos y 8 mejores terceros
+    primeros=clasificados["primeros"]
+    segundos=clasificados["segundos"]
+    terceros=clasificados["terceros"]
+
+    def primero(grupo):
+        return primeros[primeros["grupo"]==grupo].iloc[0]["id"]
+
+    def segundo(grupo):
+        return segundos[segundos["grupo"]==grupo].iloc[0]["id"]
+
+    terceros_ordenados=terceros.sort_values(by="grupo").reset_index(drop=True)
+    t=list(terceros_ordenados["id"])
+
+    partidos={    #los enfrentamientos entre primeros y segundos siguen el articulo 12.6 del reglamento, mientras que los terceros, lo que indica el pdf del tp
+        "M73": (segundo("A"), segundo("B")),
+        "M74": (primero("E"), t[4]),
+        "M75": (primero("F"), segundo("C")),
+        "M76": (primero("C"), segundo("F")),
+        "M77": (primero("I"), t[2]),
+        "M78": (segundo("E"), segundo("I")),
+        "M79": (primero("A"), t[7]),
+        "M80": (primero("L"), t[0]),
+        "M81": (primero("D"), t[5]),
+        "M82": (primero("G"), t[3]),
+        "M83": (segundo("K"), segundo("L")),
+        "M84": (primero("H"), segundo("J")),
+        "M85": (primero("B"), t[6]),
+        "M86": (primero("J"), segundo("H")),
+        "M87": (primero("K"), t[1]),
+        "M88": (segundo("D"), segundo("G")),
+    }
+
+    df=pd.read_excel("data/partidos.xlsx")
+    for id_partido in partidos:
+        eq1, eq2=partidos[id_partido]
+        df.loc[len(df)]=["", "", "Por definir", eq1, eq2, 0, 0, 0, 0, "Dieciseisavos", 0, id_partido]
+    df.to_excel("data/partidos.xlsx", index=False)   #se guardan estos nuevos partidos en partidos.xlsx
+
+
+
+def generar_octavos():    
+    partidos={   #esta tal cual en el articulo 12.7
+        "M89": (ganador_partido_por_id("M74"), ganador_partido_por_id("M77")),
+        "M90": (ganador_partido_por_id("M73"), ganador_partido_por_id("M75")),
+        "M91": (ganador_partido_por_id("M76"), ganador_partido_por_id("M78")),
+        "M92": (ganador_partido_por_id("M79"), ganador_partido_por_id("M80")),
+        "M93": (ganador_partido_por_id("M83"), ganador_partido_por_id("M84")),
+        "M94": (ganador_partido_por_id("M81"), ganador_partido_por_id("M82")),
+        "M95": (ganador_partido_por_id("M86"), ganador_partido_por_id("M88")),
+        "M96": (ganador_partido_por_id("M85"), ganador_partido_por_id("M87")),
+    }
+
+    df = pd.read_excel("data/partidos.xlsx")
+    for id_partido in partidos:
+        eq1, eq2=partidos[id_partido]
+        df.loc[len(df)]=["", "", "Por definir", eq1, eq2, 0, 0, 0, 0, "Octavos", 0, id_partido]
+    df.to_excel("data/partidos.xlsx", index=False)
+
+
+
+def generar_cuartos():
+    partidos={   #tal cual el articulo 12.8
+        "M97": (ganador_partido_por_id("M89"), ganador_partido_por_id("M90")),
+        "M98": (ganador_partido_por_id("M93"), ganador_partido_por_id("M94")),
+        "M99": (ganador_partido_por_id("M91"), ganador_partido_por_id("M92")),
+        "M100": (ganador_partido_por_id("M95"), ganador_partido_por_id("M96")),
+    }
+
+    df=pd.read_excel("data/partidos.xlsx")
+    for id_partido in partidos:
+        eq1, eq2=partidos[id_partido]
+        df.loc[len(df)]=["", "", "Por definir", eq1, eq2, 0, 0, 0, 0, "Cuartos", 0, id_partido]
+    df.to_excel("data/partidos.xlsx", index=False)
+
+
+
+def generar_semifinal():
+    partidos={     #tal cual el articulo 12.9
+        "M101": (ganador_partido_por_id("M97"), ganador_partido_por_id("M98")),
+        "M102": (ganador_partido_por_id("M99"), ganador_partido_por_id("M100")),
+    }
+
+    df=pd.read_excel("data/partidos.xlsx")
+    for id_partido in partidos:
+        eq1, eq2=partidos[id_partido]
+        df.loc[len(df)]=["", "", "Por definir", eq1, eq2, 0, 0, 0, 0, "Semifinal", 0, id_partido]
+    df.to_excel("data/partidos.xlsx", index=False)
+
+
+
+def generar_final():
+    df=pd.read_excel("data/partidos.xlsx")
+    #tal cual el articulo 12.11
+    eq1=ganador_partido_por_id("M101")
+    eq2=ganador_partido_por_id("M102")
+    df.loc[len(df)]=["", "", "Por definir", eq1, eq2, 0, 0, 0, 0, "Final", 0, "M104"]  
+
+    df.to_excel("data/partidos.xlsx", index=False)
