@@ -304,7 +304,7 @@ def abrir_configuracion():
     if not cerrada:
         def cerrar():
             cerrar_configuracion()   #cambio el txt a cerrado
-            ventana_config.destroy()  #estas 2 lineas refrescan la ventana, actualiando el estado
+            ventana_config.destroy()  #estas 2 lineas refrescan la ventana (la reinician), actualiando el estado
             abrir_configuracion()
         
         ctk.CTkButton(
@@ -317,12 +317,19 @@ def abrir_configuracion():
             command=cerrar
         ).pack(pady=7)
     else:
-        ctk.CTkLabel(   #si ce cerro la config aparece este mensaje
+        ctk.CTkLabel(   #si ce cerro la config aparece este mensaje al reiniciarse automaticamente la ventana
             frame_config,
             text="La configuracion esta cerrada, no se pueden realizar cambios",
             text_color="#e94560",
             font=ctk.CTkFont(size=12)
         ).pack(pady=7)
+
+        ctk.CTkLabel(   #Y tambien este mensaje
+        frame_config,
+        text="Reinicie la aplicacion para habilitar Registro de Resultados",
+        text_color="#04ea23",
+        font=ctk.CTkFont(size=11)
+    ).pack()
 
     
 
@@ -851,23 +858,25 @@ frame_menu = ctk.CTkFrame(ventana, fg_color="transparent")
 frame_menu.pack(expand=True)
 
 
+cerrada=configuracion_cerrada()   #retorna true o false si esta o no cerrada la configuracion
 
 #cada tupla tiene el texto del boton y la funcion que ejecuta
 opciones=[
-    ("Configuracion del Torneo", abrir_configuracion),
-    ("Registro de Resultados", abrir_resultados),
-    ("Emision de Informes", abrir_informes),
-    ("Salir", ventana.quit),
+    ("Configuracion del Torneo", abrir_configuracion, "normal"),
+    ("Registro de Resultados", abrir_resultados, "normal" if cerrada else "disabled"),
+    ("Emision de Informes", abrir_informes, "normal"),
+    ("Salir", ventana.quit, "normal"),
 ]
 
-for texto, comando in opciones:   #Se crean los botones
+for texto, comando, estado in opciones:   #Se crean los botones
     ctk.CTkButton(
         frame_menu,
         text=texto,
         width=320, #ancho del boton en pixeles
         height=48, #alto del boton en pixeles
         font=ctk.CTkFont(size=14),
-        command=comando  #funcion que se ejecuta al hacer click
+        command=comando,  #funcion que se ejecuta al hacer click
+        state=estado
     ).pack(pady=8)  #8px de espacio entre cada boton
 
 
