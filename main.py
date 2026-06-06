@@ -3,30 +3,50 @@ from datetime import datetime
 from logica import *
 
 
-def actualizar_hora():
-    ahora=datetime.now().strftime("%d/%m/%Y  %H:%M:%S") #Convierte a str la fecha y hora actual y guarda en ahora
-    label_hora.configure(text=ahora)  #Cambia la etiqueta a lo que hay en ahora  
-    ventana.after(1000, actualizar_hora)  #Actualiza 1 segundo despues
+def construir_header(ventana_padre, titulo):   #en todas las ventanas tiene que estar el titulo de la materia, hora, etc
+    header=ctk.CTkFrame(ventana_padre, corner_radius=0, fg_color="#1a1a2e")
+    header.pack(fill="x")  #estira el frame de izquierda a derecha
 
+    ctk.CTkLabel(
+        header,
+        text="COPA MUNDIAL FIFA 2026",
+        font=ctk.CTkFont(size=14, weight="bold"),
+        text_color="#e94560"
+    ).pack(pady=(10, 0)) #10 px de espacio arriba y 0 abajo
+
+    ctk.CTkLabel(
+        header,
+        text="Algoritmos y Estructuras de Datos II",
+        font=ctk.CTkFont(size=10),
+        text_color="#aaaaaa"
+    ).pack()
+
+    label_h=ctk.CTkLabel(header, text="", font=ctk.CTkFont(size=10), text_color="#aaaaaa")  #aca se va a poner la hora
+    label_h.pack(pady=(0, 4))
+
+    def actualizar():   #datetime.now() es el objeto hora actual del tipo datetime, strftime lo coniverte a str
+        label_h.configure(text=datetime.now().strftime("%d/%m/%Y  %H:%M:%S")) #.configure() cambia el widget despues de haber sido creado, entonces la hora va a ser modificada
+        ventana_padre.after(1000, actualizar) #cada 1000ms (1 segundo) se vuelve a ejecutar la funcioon
+
+    actualizar() 
+
+    ctk.CTkLabel(
+        header,
+        text=titulo,   #el titulo de la ventana
+        font=ctk.CTkFont(size=16, weight="bold"),
+        text_color="#ffffff"
+    ).pack(pady=(4, 10))
 
 
 #Funciones para configuracion del torneo
 def abrir_ingresar_equipo():   #Todo igual a las otras ventanas
     ventana_equipo = ctk.CTkToplevel(ventana)   
     ventana_equipo.title("Ingresar Equipo")
-    ventana_equipo.geometry("420x580")   #Esto debe tener este tamaño minimo para que aparezca el boton de guardar
+    ventana_equipo.geometry("420x600")   #Esto debe tener este tamaño minimo para que aparezca el boton de guardar
     ventana_equipo.resizable(False, False)  #No se puede cambiar la resolucion
     
 
-    header_equipo = ctk.CTkFrame(ventana_equipo, corner_radius=0, fg_color="#1a1a2e")
-    header_equipo.pack(fill="x")
-
-    ctk.CTkLabel(
-        header_equipo,
-        text="Ingresar Equipo",
-        font=ctk.CTkFont(size=18, weight="bold"),
-        text_color="#e94560"
-    ).pack(pady=14)
+    construir_header(ventana_equipo, "Ingresar equipo")
 
     #Aca pongo los campos del formulario
     frame_form = ctk.CTkFrame(ventana_equipo, fg_color="transparent")
@@ -41,7 +61,7 @@ def abrir_ingresar_equipo():   #Todo igual a las otras ventanas
             frame_form,
             text=campo,
             anchor="w" #anchor="w" alinea el texto a la izquierda, west es oeste en ingles
-        ).pack(fill="x", pady=(8, 2))
+        ).pack(fill="x", pady=(5, 1))
 
         entrada=ctk.CTkEntry(frame_form, width=340)   #Crea un cuadro para ingresar datos
         entrada.pack()
@@ -77,7 +97,7 @@ def abrir_ingresar_equipo():   #Todo igual a las otras ventanas
         text="Guardar Equipo",
         width=200,
         command=guardar
-    ).pack(pady=4)
+    ).pack(pady=2)
 
     ctk.CTkButton(     #Boton para cancelar o regresar
         ventana_equipo,
@@ -86,7 +106,7 @@ def abrir_ingresar_equipo():   #Todo igual a las otras ventanas
         fg_color="transparent",     
         border_width=1,             
         command=ventana_equipo.destroy
-    ).pack(pady=4)
+    ).pack(pady=2)
 
     ventana_equipo.grab_set()  #No se puede usar la ventana anterior, tengo que ponerlo aca por problemas de linux hyperland
 
@@ -95,18 +115,10 @@ def abrir_ingresar_equipo():   #Todo igual a las otras ventanas
 def abrir_ingresar_partido():
     ventana_partido=ctk.CTkToplevel(ventana)   #Igual al anterior
     ventana_partido.title("Ingresar Partido")
-    ventana_partido.geometry("700x500")
+    ventana_partido.geometry("700x600")
     ventana_partido.resizable(False, False)
 
-    header_partido=ctk.CTkFrame(ventana_partido, corner_radius=0, fg_color="#1a1a2e")
-    header_partido.pack(fill="x")
-
-    ctk.CTkLabel(
-        header_partido,
-        text="Ingresar Partido",
-        font=ctk.CTkFont(size=18, weight="bold"),
-        text_color="#e94560"
-    ).pack(pady=14)
+    construir_header(ventana_partido, "Ingresar partido")
 
     frame_form=ctk.CTkFrame(ventana_partido, fg_color="transparent")
     frame_form.pack(padx=40, pady=20, fill="x")
@@ -181,21 +193,13 @@ def abrir_ingresar_partido():
 def abrir_ver_equipos():
     ventana_equipos = ctk.CTkToplevel(ventana)  #Igual que todas las ventanas
     ventana_equipos.title("Ver Equipos")
-    ventana_equipos.geometry("700x500")
+    ventana_equipos.geometry("700x700")
     ventana_equipos.resizable(False, False)
 
-    header_equipos = ctk.CTkFrame(ventana_equipos, corner_radius=0, fg_color="#1a1a2e")
-    header_equipos.pack(fill="x")
-
-    ctk.CTkLabel(
-        header_equipos,
-        text="Equipos",
-        font=ctk.CTkFont(size=18, weight="bold"),
-        text_color="#e94560"
-    ).pack(pady=14)
+    construir_header(ventana_equipos, "Ver equipos")
 
     #ctktextbox crea un cuadro de texto para guardar datos
-    textbox = ctk.CTkTextbox(ventana_equipos, width=660, height=360, font=ctk.CTkFont(family="Courier", size=12))
+    textbox = ctk.CTkTextbox(ventana_equipos, width=660, height=500, font=ctk.CTkFont(family="Courier", size=12))
     textbox.pack(pady=20)
 
     df=ver_equipos()  #guardo el contenido del excel en el dataframe df
@@ -220,20 +224,12 @@ def abrir_ver_equipos():
 def abrir_ver_partidos():
     ventana_partidos = ctk.CTkToplevel(ventana)   #Igual que todas las ventanas
     ventana_partidos.title("Ver Partidos")
-    ventana_partidos.geometry("900x500")
+    ventana_partidos.geometry("900x800")
     ventana_partidos.resizable(False, False)
 
-    header_partidos=ctk.CTkFrame(ventana_partidos, corner_radius=0, fg_color="#1a1a2e")
-    header_partidos.pack(fill="x")
+    construir_header(ventana_partidos, "Ver partidos")
 
-    ctk.CTkLabel(
-        header_partidos,
-        text="Partidos",
-        font=ctk.CTkFont(size=18, weight="bold"),
-        text_color="#e94560"
-    ).pack(pady=14)
-
-    textbox=ctk.CTkTextbox(ventana_partidos, width=860, height=360, font=ctk.CTkFont(family="Courier", size=12))   #Courier queda lindo
+    textbox=ctk.CTkTextbox(ventana_partidos, width=860, height=600, font=ctk.CTkFont(family="Courier", size=12))   #Courier queda lindo
     textbox.pack(pady=20)
 
     df=ver_partidos()  #Guarda el contenido del excel en el df
@@ -256,22 +252,12 @@ def abrir_ver_partidos():
 
 
 def abrir_configuracion():
-    ventana_config = ctk.CTkToplevel(ventana) #crea una ventana secundaria encima de la principal
+    ventana_config=ctk.CTkToplevel(ventana) #crea una ventana secundaria encima de la principal
     ventana_config.title("Configuración del Torneo")
     ventana_config.geometry("600x520")
     ventana_config.resizable(False, False)  #cambiar la resolucion se me bugea desde linux
     
-    
-    #nuevo header, igual al menu principal
-    header_config = ctk.CTkFrame(ventana_config, corner_radius=0, fg_color="#1a1a2e")
-    header_config.pack(fill="x")
-
-    ctk.CTkLabel(
-        header_config,
-        text="Configuración del Torneo",
-        font=ctk.CTkFont(size=18, weight="bold"),
-        text_color="#e94560"
-    ).pack(pady=14)
+    construir_header(ventana_config, "Configuración del Torneo")
 
     #marco para botones
     frame_config = ctk.CTkFrame(ventana_config, fg_color="transparent")
@@ -349,18 +335,10 @@ def abrir_configuracion():
 def abrir_resultados():
     ventana_res=ctk.CTkToplevel(ventana)
     ventana_res.title("Registro de Resultados")
-    ventana_res.geometry("500x740")
+    ventana_res.geometry("500x800")
     ventana_res.resizable(False, False)
 
-    header_res=ctk.CTkFrame(ventana_res, corner_radius=0, fg_color="#1a1a2e")
-    header_res.pack(fill="x")
-
-    ctk.CTkLabel(
-        header_res,
-        text="Registro de Resultados",
-        font=ctk.CTkFont(size=18, weight="bold"),
-        text_color="#e94560"
-    ).pack(pady=14)
+    construir_header(ventana_res, "Registrar resultados")
 
     frame_form=ctk.CTkFrame(ventana_res, fg_color="transparent")
     frame_form.pack(padx=40, pady=20, fill="x")
@@ -408,7 +386,7 @@ def abrir_resultados():
         text="Guardar Resultado",
         width=200,
         command=guardar
-    ).pack(pady=4)
+    ).pack(pady=2)
 
 
 
@@ -437,23 +415,23 @@ def abrir_resultados():
     #los botones apareceran solo si la fase anterior se termino, y apareceran solo hasta ser presionados
     if grupos_completos() and not hay_partidos_de_fase("Dieciseisavos"):
         ctk.CTkButton(ventana_res, text="Generar Dieciseisavos", width=200,
-            fg_color="#44bb77", command=gen_dieciseisavos).pack(pady=4)
+            fg_color="#44bb77", command=gen_dieciseisavos).pack(pady=1)
 
     if ronda_completa("Dieciseisavos") and not hay_partidos_de_fase("Octavos"):
         ctk.CTkButton(ventana_res, text="Generar Octavos", width=200,
-            fg_color="#44bb77", command=gen_octavos).pack(pady=4)
+            fg_color="#44bb77", command=gen_octavos).pack(pady=1)
 
     if ronda_completa("Octavos") and not hay_partidos_de_fase("Cuartos"):
         ctk.CTkButton(ventana_res, text="Generar Cuartos", width=200,
-            fg_color="#44bb77", command=gen_cuartos).pack(pady=4)
+            fg_color="#44bb77", command=gen_cuartos).pack(pady=1)
 
     if ronda_completa("Cuartos") and not hay_partidos_de_fase("Semifinal"):
         ctk.CTkButton(ventana_res, text="Generar Semifinal", width=200,
-            fg_color="#44bb77", command=gen_semifinal).pack(pady=4)
+            fg_color="#44bb77", command=gen_semifinal).pack(pady=1)
 
     if ronda_completa("Semifinal") and not hay_partidos_de_fase("Final"):
         ctk.CTkButton(ventana_res, text="Generar Final", width=200,
-            fg_color="#44bb77", command=gen_final).pack(pady=4)
+            fg_color="#44bb77", command=gen_final).pack(pady=1)
         
 
 
@@ -464,7 +442,7 @@ def abrir_resultados():
         fg_color="transparent",
         border_width=1,
         command=ventana_res.destroy
-    ).pack(pady=4)
+    ).pack(pady=2)
 
     ventana_res.grab_set()
 
@@ -474,20 +452,12 @@ def abrir_resultados():
 
 
 def abrir_informes():
-    ventana_informes = ctk.CTkToplevel(ventana)   #Igual que abrir configuracion
-    ventana_informes.title("Emisión de Informes")
-    ventana_informes.geometry("600x460")
+    ventana_informes=ctk.CTkToplevel(ventana)   #Igual que abrir configuracion
+    ventana_informes.title("Emision de Informes")
+    ventana_informes.geometry("600x550")
     ventana_informes.resizable(False, False)
 
-    header_informes = ctk.CTkFrame(ventana_informes, corner_radius=0, fg_color="#1a1a2e")
-    header_informes.pack(fill="x")
-
-    ctk.CTkLabel(
-        header_informes,
-        text="Emisión de Informes",
-        font=ctk.CTkFont(size=18, weight="bold"),
-        text_color="#e94560"
-    ).pack(pady=14)
+    construir_header(ventana_informes, "Emision de informes")
 
     frame_informes = ctk.CTkFrame(ventana_informes, fg_color="transparent")
     frame_informes.pack(expand=True)
@@ -519,18 +489,10 @@ def abrir_informes():
 def abrir_informe1():
     ventana_inf1=ctk.CTkToplevel(ventana)
     ventana_inf1.title("Partidos por fecha")
-    ventana_inf1.geometry("600x500")
+    ventana_inf1.geometry("600x600")
     ventana_inf1.resizable(False, False)
 
-    header_inf1 = ctk.CTkFrame(ventana_inf1, corner_radius=0, fg_color="#1a1a2e")
-    header_inf1.pack(fill="x")
-
-    ctk.CTkLabel(
-        header_inf1,
-        text="Partidos por Fecha",
-        font=ctk.CTkFont(size=18, weight="bold"),
-        text_color="#e94560"
-    ).pack(pady=14)
+    construir_header(ventana_inf1,"Partidos por fecha")
 
     frame_input=ctk.CTkFrame(ventana_inf1, fg_color="transparent")
     frame_input.pack(pady=20)
@@ -599,18 +561,10 @@ def abrir_informe1():
 def abrir_informe2():
     ventana_inf2 = ctk.CTkToplevel(ventana)
     ventana_inf2.title("Tabla de posiciones por grupo")
-    ventana_inf2.geometry("600x500")
+    ventana_inf2.geometry("600x600")
     ventana_inf2.resizable(False, False)
 
-    header_inf2=ctk.CTkFrame(ventana_inf2, corner_radius=0, fg_color="#1a1a2e")
-    header_inf2.pack(fill="x")
-
-    ctk.CTkLabel(
-        header_inf2,
-        text="Tabla de Posiciones por Grupo",
-        font=ctk.CTkFont(size=18, weight="bold"),
-        text_color="#e94560"
-    ).pack(pady=14)
+    construir_header(ventana_inf2, "Tabla de posiciones por grupo")
 
     frame_input=ctk.CTkFrame(ventana_inf2, fg_color="transparent")
     frame_input.pack(pady=20)
@@ -677,18 +631,10 @@ def abrir_informe2():
 def abrir_informe3():
     ventana_inf3=ctk.CTkToplevel(ventana)
     ventana_inf3.title("Resultados por equipo")
-    ventana_inf3.geometry("600x500")
+    ventana_inf3.geometry("600x600")
     ventana_inf3.resizable(False, False)
 
-    header_inf3=ctk.CTkFrame(ventana_inf3, corner_radius=0, fg_color="#1a1a2e")
-    header_inf3.pack(fill="x")
-
-    ctk.CTkLabel(
-        header_inf3,
-        text="Resultados por Equipo",
-        font=ctk.CTkFont(size=18, weight="bold"),
-        text_color="#e94560"
-    ).pack(pady=14)
+    construir_header(ventana_inf3, "Resultados por equipo")
 
     frame_input=ctk.CTkFrame(ventana_inf3, fg_color="transparent")
     frame_input.pack(pady=20)
@@ -767,18 +713,10 @@ def abrir_informe3():
 def abrir_informe4():
     ventana_inf4 = ctk.CTkToplevel(ventana)
     ventana_inf4.title("Proximo partido")
-    ventana_inf4.geometry("600x500")
+    ventana_inf4.geometry("600x600")
     ventana_inf4.resizable(False, False)
 
-    header_inf4 = ctk.CTkFrame(ventana_inf4, corner_radius=0, fg_color="#1a1a2e")
-    header_inf4.pack(fill="x")
-
-    ctk.CTkLabel(
-        header_inf4,
-        text="Proximo Partido por Equipo",
-        font=ctk.CTkFont(size=18, weight="bold"),
-        text_color="#e94560"
-    ).pack(pady=14)
+    construir_header(ventana_inf4, "Proximo partido")
 
     frame_input = ctk.CTkFrame(ventana_inf4, fg_color="transparent")
     frame_input.pack(pady=20)
@@ -851,18 +789,10 @@ def abrir_informe4():
 def abrir_informe5():
     ventana_inf5=ctk.CTkToplevel(ventana)
     ventana_inf5.title("Todos los grupos")
-    ventana_inf5.geometry("600x500")
+    ventana_inf5.geometry("600x600")
     ventana_inf5.resizable(False, False)
 
-    header_inf5 = ctk.CTkFrame(ventana_inf5, corner_radius=0, fg_color="#1a1a2e")
-    header_inf5.pack(fill="x")
-
-    ctk.CTkLabel(
-        header_inf5,
-        text="Tabla de Todos los Grupos",
-        font=ctk.CTkFont(size=18, weight="bold"),
-        text_color="#e94560"
-    ).pack(pady=14)
+    construir_header(ventana_inf5, "Todos los grupos")
 
     textbox=ctk.CTkTextbox(ventana_inf5, width=540, height=360, font=ctk.CTkFont(family="Courier", size=12))
     textbox.pack(pady=20)
@@ -874,9 +804,9 @@ def abrir_informe5():
     for grupo in grupos:
         df=grupos[grupo]
         textbox.insert("end", f"Grupo {grupo}\n")
-        textbox.insert("end", "─" * 50 + "\n")
+        textbox.insert("end", "─" * 57 + "\n")
         textbox.insert("end", encabezado)
-        textbox.insert("end", "─" * 50 + "\n")
+        textbox.insert("end", "─" * 57 + "\n")
 
         for i in range(len(df)):
             fila = df.iloc[i]
@@ -913,52 +843,17 @@ ventana=ctk.CTk() #Crea la ventana
 ventana.title("Copa Mundial FIFA 2026")
 ventana.geometry("700x500")
 
-header=ctk.CTkFrame(ventana, corner_radius=0, fg_color="#1a1a2e")
-header.pack(fill="x")
-
-
-
-#Titulos, fecha, materia, etc
-ctk.CTkLabel(
-    header,
-    text="COPA MUNDIAL FIFA 2026",
-    font=ctk.CTkFont(family="Arial", size=22, weight="bold"),
-    text_color="#e94560"
-).pack(pady=(18, 2))
-
-ctk.CTkLabel(
-    header,
-    text="Algoritmos y Estructuras de Datos II",
-    font=ctk.CTkFont(size=11),
-    text_color="#aaaaaa"
-).pack(pady=(0, 2))
-
-label_hora = ctk.CTkLabel(
-    header,
-    text="",
-    font=ctk.CTkFont(size=11),
-    text_color="#aaaaaa"
-)
-label_hora.pack(pady=(0, 14))
-actualizar_hora()
-
-
-
+construir_header(ventana, "MENU PRINCIPAL")
 
 
 #Menu principal
 frame_menu = ctk.CTkFrame(ventana, fg_color="transparent")
 frame_menu.pack(expand=True)
 
-ctk.CTkLabel(
-    frame_menu,
-    text="MENU PRINCIPAL",
-    font=ctk.CTkFont(size=14, weight="bold"),
-    text_color="#cccccc"
-).pack(pady=(0, 20))  #20 de px de espacio abajo, para separarlo de los botones
+
 
 #cada tupla tiene el texto del boton y la funcion que ejecuta
-opciones = [
+opciones=[
     ("Configuracion del Torneo", abrir_configuracion),
     ("Registro de Resultados", abrir_resultados),
     ("Emision de Informes", abrir_informes),
