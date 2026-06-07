@@ -111,11 +111,11 @@ def registrar_resultado(fecha, pais1, pais2, goles1, goles2, penales1, penales2)
 
 
 
-def avance_maximo(id_eq):   #maximo avance de un equipo
+def avance_maximo(id_eq):   #maximo avance de un equipo, para el informe 3
     df=pd.read_excel("data/partidos.xlsx")
 
     #orden de fases de menor a mayor
-    fases=["Grupos", "Dieciseisavos", "Octavos", "Cuartos", "Semifinal", "Final"]
+    fases=["Grupos", "Dieciseisavos", "Octavos", "Cuartos", "Semifinal"]
 
     #verificamos si el equipo jugo en cada fase
     ultimo_avance="Fase de Grupos"
@@ -129,16 +129,25 @@ def avance_maximo(id_eq):   #maximo avance de un equipo
         if len(partidos_fase)>0:
             ultimo_avance=fase
 
-    #si llego a la final, verificamos si gano o perdio
+    #si llego a la final, verificamos si gano o perdio (campeon o vicecampeon)
     final=df[(df["fase"]=="Final") & (df["jugado"]==1)]
     if len(final)>0:
         fila_final=final.iloc[0]
-        if ganador_partido(fila_final)==id_eq:
+        if ganador_partido(fila_final)==id_eq:  #si gano
             return "Campeon"
-        elif fila_final["equipo1"]==id_eq or fila_final["equipo2"]==id_eq:
+        elif fila_final["equipo1"]==id_eq or fila_final["equipo2"]==id_eq:  #si perdio
             return "Vicecampeon"
+        
+    #si llego a tercer puesto, verificamos si gano o perdio (tercer o cuarto puesto)
+    tercero = df[(df["fase"]=="Tercer Puesto") & (df["jugado"]==1)]
+    if len(tercero)>0:
+        fila_tercero=tercero.iloc[0]
+        if ganador_partido(fila_tercero)==id_eq:   #si gano
+            return "Tercer Puesto"
+        elif fila_tercero["equipo1"]==id_eq or fila_tercero["equipo2"]==id_eq:   #si perdio
+            return "Cuarto Puesto"
 
-    return ultimo_avance
+    return ultimo_avance   #si no llego ni a tercer puesto retorna su ultimo avandce de la lista de fases
 
 
 
