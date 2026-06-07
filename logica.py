@@ -435,9 +435,25 @@ def generar_semifinal():
 
 def generar_final():
     df=pd.read_excel("data/partidos.xlsx")
-    #tal cual el articulo 12.11
+    #final, tal cual el articulo 12.11
     eq1=ganador_partido_por_id("M101")
     eq2=ganador_partido_por_id("M102")
     df.loc[len(df)]=["", "", "Por definir", eq1, eq2, 0, 0, 0, 0, "Final", 0, "M104"]  
+
+    #tercer puesto, tal cual el articulo 12.10
+    semi1=df[df["id_partido"]=="M101"].iloc[0]  #M101 y M102 son los 2 partidos semifinales
+    semi2=df[df["id_partido"]=="M102"].iloc[0]
+
+    #como se los ganadores, los otros tienen que ser los perdedores
+    if eq1==semi1["equipo1"]:
+        eq3=semi1["equipo2"]
+    else:
+        eq3=semi1["equipo1"]
+
+    if eq2==semi2["equipo1"]:
+        eq4=semi2["equipo2"]
+    else:
+        eq4=semi2["equipo1"]
+    df.loc[len(df)] = ["", "", "Por definir", eq3, eq4, 0, 0, 0, 0, "Tercer Puesto", 0, "M103"]
 
     df.to_excel("data/partidos.xlsx", index=False)

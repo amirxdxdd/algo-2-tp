@@ -436,8 +436,8 @@ def abrir_resultados():
         ctk.CTkButton(ventana_res, text="Generar Semifinal", width=200,
             fg_color="#44bb77", command=gen_semifinal).pack(pady=1)
 
-    if ronda_completa("Semifinal") and not hay_partidos_de_fase("Final"):
-        ctk.CTkButton(ventana_res, text="Generar Final", width=200,
+    if ronda_completa("Semifinal") and not hay_partidos_de_fase("Final"):  #no hace falta verificar nada del tercer puesto poeque se generan juntos
+        ctk.CTkButton(ventana_res, text="Generar Final y Tercer puesto", width=200,
             fg_color="#44bb77", command=gen_final).pack(pady=1)
         
 
