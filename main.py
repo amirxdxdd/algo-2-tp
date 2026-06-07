@@ -342,7 +342,7 @@ def abrir_configuracion():
 def abrir_resultados():
     ventana_res=ctk.CTkToplevel(ventana)
     ventana_res.title("Registro de Resultados")
-    ventana_res.geometry("500x800")
+    ventana_res.geometry("500x870")
     ventana_res.resizable(False, False)
 
     construir_header(ventana_res, "Registrar resultados")
@@ -350,7 +350,7 @@ def abrir_resultados():
     frame_form=ctk.CTkFrame(ventana_res, fg_color="transparent")
     frame_form.pack(padx=40, pady=20, fill="x")
 
-    campos=["Fecha (DD/MM/AAAA)", "Equipo 1", "Equipo 2", "Goles Equipo 1", "Goles Equipo 2", "Penales Equipo 1", "Penales Equipo 2"]
+    campos=["Fecha (DD/MM/AAAA)", "Hora(HH:MM)", "Lugar", "Equipo 1", "Equipo 2", "Goles Equipo 1", "Goles Equipo 2", "Penales Equipo 1", "Penales Equipo 2"]
     entradas={}
 
     for campo in campos:
@@ -364,6 +364,8 @@ def abrir_resultados():
 
     def guardar():
         fecha=entradas["Fecha (DD/MM/AAAA)"].get().strip()
+        hora=entradas["Hora(HH:MM)"].get().strip()
+        lugar=entradas["Lugar"].get().strip()
         pais1=entradas["Equipo 1"].get().strip()
         pais2=entradas["Equipo 2"].get().strip()
         g1=entradas["Goles Equipo 1"].get().strip()
@@ -371,7 +373,7 @@ def abrir_resultados():
         pen1=entradas["Penales Equipo 1"].get().strip()
         pen2=entradas["Penales Equipo 2"].get().strip()
 
-        if fecha=="" or pais1=="" or pais2=="" or g1=="" or g2=="" or pen1=="" or pen2=="":
+        if fecha=="" or hora=="" or lugar=="" or pais1=="" or pais2=="" or g1=="" or g2=="" or pen1=="" or pen2=="":
             label_mensaje.configure(text="Completa todos los campos.", text_color="#e94560")
             return
 
@@ -379,7 +381,7 @@ def abrir_resultados():
             label_mensaje.configure(text="Goles y penales deben ser numeros.", text_color="#e94560")
             return
 
-        resultado=registrar_resultado(fecha, pais1, pais2, int(g1), int(g2), int(pen1), int(pen2))
+        resultado=registrar_resultado(fecha, hora, lugar, pais1, pais2, int(g1), int(g2), int(pen1), int(pen2))
 
         if resultado=="equipo_no_existe":
             label_mensaje.configure(text="Uno de los equipos no existe.", text_color="#e94560")
