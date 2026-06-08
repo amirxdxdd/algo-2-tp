@@ -113,12 +113,38 @@ def abrir_ingresar_equipo():   #Todo igual a las otras ventanas
 
 
 def abrir_ingresar_partido():
-    ventana_partido=ctk.CTkToplevel(ventana)   #Igual al anterior
-    ventana_partido.title("Ingresar Partido")
+    ventana_tipo=ctk.CTkToplevel(ventana)   #Igual al anterior
+    ventana_tipo.title("Ingresar Partido")
+    ventana_tipo.geometry("500x400")
+    ventana_tipo.resizable(False, False)
+
+    construir_header(ventana_tipo, "Ingresar partido")
+
+    frame=ctk.CTkFrame(ventana_tipo, fg_color="transparent")
+    frame.pack(expand=True)
+
+    ctk.CTkLabel(frame, text="Seleccionar fase del partido", font=ctk.CTkFont(size=13)).pack(pady=(0, 20))
+
+    ctk.CTkButton(frame, text="Fase de Grupos", width=300, height=44,    #dar la opcion de elegir si el partido es de fase eliminatoria o de grupos
+        command=abrir_ingresar_partido_grupos).pack(pady=8)
+    
+    ctk.CTkButton(frame, text="Fase Eliminatoria", width=300, height=44,
+        command=abrir_ingresar_partido_eliminatorio).pack(pady=8)
+      
+    ctk.CTkButton(frame, text="Volver", width=300, height=44,
+        fg_color="transparent", border_width=1,
+        command=ventana_tipo.destroy).pack(pady=8)
+
+    ventana_tipo.grab_set()
+
+
+def abrir_ingresar_partido_grupos():
+    ventana_partido=ctk.CTkToplevel(ventana)
+    ventana_partido.title("Ingresar Partido - Grupos")
     ventana_partido.geometry("700x600")
     ventana_partido.resizable(False, False)
 
-    construir_header(ventana_partido, "Ingresar partido")
+    construir_header(ventana_partido, "Ingresar Partido - Grupos")
 
     frame_form=ctk.CTkFrame(ventana_partido, fg_color="transparent")
     frame_form.pack(padx=40, pady=20, fill="x")
@@ -127,13 +153,8 @@ def abrir_ingresar_partido():
     entradas={}
 
     for campo in campos:
-        ctk.CTkLabel(
-            frame_form,
-            text=campo,
-            anchor="w"
-        ).pack(fill="x", pady=(2, 2))
-
-        entrada=ctk.CTkEntry(frame_form, width=340)   #Cuadro para ingresar datos
+        ctk.CTkLabel(frame_form, text=campo, anchor="w").pack(fill="x", pady=(2, 2))
+        entrada=ctk.CTkEntry(frame_form, width=340)
         entrada.pack()
         entradas[campo]=entrada
 
@@ -147,45 +168,82 @@ def abrir_ingresar_partido():
         pais1=entradas["Equipo 1"].get().strip()
         pais2=entradas["Equipo 2"].get().strip()
 
-        #verificar que no hayan campos vacios
         if fecha=="" or hora=="" or lugar=="" or pais1=="" or pais2=="":
             label_mensaje.configure(text="Completa todos los campos.", text_color="#e94560")
             return
 
-        #Buscar el equipo
         equipos=pd.read_excel("data/equipos.xlsx")
-        eq1=equipos[equipos["pais"].str.upper()==pais1.upper()]
-        eq2=equipos[equipos["pais"].str.upper()==pais2.upper()]
+        eq1=equipos[equipos["pais"].str.upper() == pais1.upper()]
+        eq2=equipos[equipos["pais"].str.upper() == pais2.upper()]
 
         if len(eq1)==0 or len(eq2)==0:
             label_mensaje.configure(text="Uno de los equipos no existe.", text_color="#e94560")
             return
 
-        id_eq1=eq1.iloc[0]["id"]    #Obtener los id
+        id_eq1=eq1.iloc[0]["id"]
         id_eq2=eq2.iloc[0]["id"]
-
-        ingresar_partido(fecha, hora, lugar, id_eq1, id_eq2, 0, 0, 0, 0, "Grupos")  #Esto solo lo agenda al calendario, todavia no se cargan los goles
+        ingresar_partido(fecha, hora, lugar, id_eq1, id_eq2, "Grupos") 
         label_mensaje.configure(text="Partido guardado correctamente.", text_color="#44bb77")
 
-
-    ctk.CTkButton(
-        ventana_partido,
-        text="Guardar Partido",
-        width=200,
-        command=guardar
-    ).pack(pady=2)
-
-    ctk.CTkButton(
-        ventana_partido,
-        text="Volver",
-        width=200,
-        fg_color="transparent",
-        border_width=1,
-        command=ventana_partido.destroy
-    ).pack(pady=2)
+    ctk.CTkButton(ventana_partido, text="Guardar Partido", width=200, command=guardar).pack(pady=2)
+    ctk.CTkButton(ventana_partido, text="Volver", width=200, fg_color="transparent",
+        border_width=1, command=ventana_partido.destroy).pack(pady=2)
 
     ventana_partido.grab_set()
 
+
+
+def abrir_ingresar_partido_eliminatorio():
+    ventana_elim=ctk.CTkToplevel(ventana)
+    ventana_elim.title("Ingresar Partido - Eliminatorio")
+    ventana_elim.geometry("500x550")
+    ventana_elim.resizable(False, False)
+
+    construir_header(ventana_elim, "Ingresar Partido - Eliminatorio")
+
+    frame_form=ctk.CTkFrame(ventana_elim, fg_color="transparent")
+    frame_form.pack(padx=40, pady=20, fill="x")
+
+    #selector de fase
+    ctk.CTkLabel(frame_form, text="Fase", anchor="w").pack(fill="x", pady=(4, 2))
+    selector_fase=ctk.CTkOptionMenu(   #un pequeño menu que se abrira para seleccionar fase
+        frame_form,
+        values=["Dieciseisavos", "Octavos", "Cuartos", "Semifinal", "Final", "Tercer Puesto"],
+        width=340
+    )
+    selector_fase.pack()
+
+    campos=["Fecha (DD/MM/AAAA)", "Hora (HH:MM)", "Lugar"]
+    entradas={}
+
+    for campo in campos:
+        ctk.CTkLabel(frame_form, text=campo, anchor="w").pack(fill="x", pady=(4, 2))
+        entrada=ctk.CTkEntry(frame_form, width=340)
+        entrada.pack()
+        entradas[campo]=entrada
+
+    label_mensaje=ctk.CTkLabel(ventana_elim, text="", text_color="#aaaaaa")
+    label_mensaje.pack(pady=(6, 2))
+
+    def guardar():
+        fase=selector_fase.get()
+        fecha=entradas["Fecha (DD/MM/AAAA)"].get().strip()
+        hora=entradas["Hora (HH:MM)"].get().strip()
+        lugar=entradas["Lugar"].get().strip()
+
+        if fecha=="" or hora=="" or lugar=="":
+            label_mensaje.configure(text="Completa todos los campos.", text_color="#e94560")
+            return
+
+        #equipos vacios, se asignaran al generar la fase
+        ingresar_partido(fecha, hora, lugar, "", "", fase)
+        label_mensaje.configure(text="Partido guardado correctamente.", text_color="#44bb77")
+
+    ctk.CTkButton(ventana_elim, text="Guardar Partido", width=200, command=guardar).pack(pady=4)
+    ctk.CTkButton(ventana_elim, text="Volver", width=200, fg_color="transparent",
+        border_width=1, command=ventana_elim.destroy).pack(pady=4)
+
+    ventana_elim.grab_set()    
 
 
 
@@ -342,7 +400,7 @@ def abrir_configuracion():
 def abrir_resultados():
     ventana_res=ctk.CTkToplevel(ventana)
     ventana_res.title("Registro de Resultados")
-    ventana_res.geometry("500x870")
+    ventana_res.geometry("600x700")
     ventana_res.resizable(False, False)
 
     construir_header(ventana_res, "Registrar resultados")
@@ -350,45 +408,94 @@ def abrir_resultados():
     frame_form=ctk.CTkFrame(ventana_res, fg_color="transparent")
     frame_form.pack(padx=40, pady=20, fill="x")
 
-    campos=["Fecha (DD/MM/AAAA)", "Hora(HH:MM)", "Lugar", "Equipo 1", "Equipo 2", "Goles Equipo 1", "Goles Equipo 2", "Penales Equipo 1", "Penales Equipo 2"]
+    partidos_disponibles=[None]   #la lista funciona como una variable global, puede ser modificada por las funciones
+
+    def actualizar_lista():
+        fase=fase_actual()
+        df=partidos_sin_resultado(fase)
+        partidos_disponibles[0]=df
+
+        if len(df)==0:
+            selector_partido.configure(values=["No hay partidos disponibles"])  #hace que sea la unica opcion disponible en el mini menu
+            selector_partido.set("No hay partidos disponibles")   #selecciona esa opcion
+            return
+        
+        opciones=[]   #aca se guardaran los str departidos disponibles
+        for i in range(len(df)):
+            fila=df.iloc[i]
+            pais1=obtener_pais(fila["equipo1"])
+            pais2=obtener_pais(fila["equipo2"])
+            opciones.append(f"{fila['fecha']} {fila['hora']} - {pais1} vs {pais2}")
+
+        selector_partido.configure(values=opciones)
+        selector_partido.set(opciones[0])  #selecciona el primer partido automaticamente
+    
+    fase=fase_actual()
+
+    if fase=="Torneo finalizado":
+        ctk.CTkLabel(frame_form, text="El torneo ha finalizado",
+                     text_color="#44bb77", font=ctk.CTkFont(size=13)).pack(pady=10)
+    else:   #Muestra la fase actual y el selector de partidos disponibles
+        ctk.CTkLabel(frame_form, text=f"Fase actual: {fase}", text_color="#ffffff", font=ctk.CTkFont(size=13, weight="bold")).pack(pady=(0,10))
+        
+        ctk.CTkLabel(frame_form, text="Partido", anchor="w").pack(fill="x", pady=(4, 2))
+        selector_partido=ctk.CTkOptionMenu(frame_form, values=[""], width=340)
+        selector_partido.pack()
+    
+
+    #campos de goles, deshabilitado hasta encontrar el partido 
+    campos_goles=["Goles Equipo 1", "Goles Equipo 2", "Penales Equipo 1", "Penales Equipo 2"]
     entradas={}
 
-    for campo in campos:
-        ctk.CTkLabel(frame_form, text=campo, anchor="w").pack(fill="x", pady=(6, 2))
+    for campo in campos_goles:
+        ctk.CTkLabel(frame_form, text=campo, anchor="w").pack(fill="x", pady=(4,2))
         entrada=ctk.CTkEntry(frame_form, width=340)
         entrada.pack()
         entradas[campo]=entrada
 
+
     label_mensaje=ctk.CTkLabel(ventana_res, text="", text_color="#aaaaaa")
-    label_mensaje.pack(pady=(10, 4))
+    label_mensaje.pack(pady=(6,2))  #mensaje donde avisara si hubo error o si se registro correctamente
+
 
     def guardar():
-        fecha=entradas["Fecha (DD/MM/AAAA)"].get().strip()
-        hora=entradas["Hora(HH:MM)"].get().strip()
-        lugar=entradas["Lugar"].get().strip()
-        pais1=entradas["Equipo 1"].get().strip()
-        pais2=entradas["Equipo 2"].get().strip()
+        df=partidos_disponibles[0]
+        
+        if df is None or len(df)==0:  
+            label_mensaje.configure(text="No hay partidos disponibles para esta fase", text_color="#e94560")
+            return
+
+        #parece kilombo pero es chill
+
+        seleccion=selector_partido.get()  #obtiene el partido selecionado en el mini menu
+        opciones=selector_partido.cget("values")   #cget obtiene una tupla con todas las opciones del minimenu
+        indice_seleccion=list(opciones).index(seleccion)   #convierte la tupla a lista para usar index, obteniendo su indice en el mini menu
+        fila=df.iloc[indice_seleccion]   #con el indice, puede acceder a la fila del dataframe del partido
+        indice=fila.name    #y finalmente con name, obtiene el indice real, el que esta en el excel, para poder modificarlo
+
+
         g1=entradas["Goles Equipo 1"].get().strip()
         g2=entradas["Goles Equipo 2"].get().strip()
         pen1=entradas["Penales Equipo 1"].get().strip()
         pen2=entradas["Penales Equipo 2"].get().strip()
 
-        if fecha=="" or hora=="" or lugar=="" or pais1=="" or pais2=="" or g1=="" or g2=="" or pen1=="" or pen2=="":
-            label_mensaje.configure(text="Completa todos los campos.", text_color="#e94560")
+        if g1=="" or g2=="" or pen1=="" or pen2=="":
+            label_mensaje.configure(text="Completa todos los campos", text_color="#e94560")
             return
 
         if not g1.isdigit() or not g2.isdigit() or not pen1.isdigit() or not pen2.isdigit():
-            label_mensaje.configure(text="Goles y penales deben ser numeros.", text_color="#e94560")
+            label_mensaje.configure(text="Deben ser numeros los goles y penales", text_color="#e94560")
             return
 
-        resultado=registrar_resultado(fecha, hora, lugar, pais1, pais2, int(g1), int(g2), int(pen1), int(pen2))
+        registrar_resultado(indice, int(g1), int(g2), int(pen1), int(pen2))
+        label_mensaje.configure(text="Resultado registrado correctamente.", text_color="#44bb77")
 
-        if resultado=="equipo_no_existe":
-            label_mensaje.configure(text="Uno de los equipos no existe.", text_color="#e94560")
-        elif resultado=="partido_no_existe":
-            label_mensaje.configure(text="No existe ese partido en el calendario.", text_color="#e94560")
-        else:
-            label_mensaje.configure(text="Resultado registrado correctamente.", text_color="#44bb77")
+        for entry in entradas.values():
+            entry.delete(0, "end")
+
+        actualizar_lista()   #quita el partido que se acaba de ingresar de la lista de partidos disponibles
+        refrescar_botones()   #si ya se ingresaron todos los de la fase, se habilita el boton para la siguiente fase
+
 
     ctk.CTkButton(
         ventana_res,
@@ -397,53 +504,6 @@ def abrir_resultados():
         command=guardar
     ).pack(pady=2)
 
-
-
-    def ejecutar_y_cerrar(funcion):   #ejecuta la funcion, cierra la ventana y la vuelve a abrir
-        funcion()
-        ventana_res.destroy()
-        abrir_resultados()
-
-
-    #cada funcion crea los partidos de su fase
-    def gen_dieciseisavos():
-        ejecutar_y_cerrar(generar_dieciseisavos)
-
-    def gen_octavos():
-        ejecutar_y_cerrar(generar_octavos)
-
-    def gen_cuartos():
-        ejecutar_y_cerrar(generar_cuartos)
-
-    def gen_semifinal():
-        ejecutar_y_cerrar(generar_semifinal)
-
-    def gen_final():
-        ejecutar_y_cerrar(generar_final)
-
-    #los botones apareceran solo si la fase anterior se termino, y apareceran solo hasta ser presionados
-    if grupos_completos() and not hay_partidos_de_fase("Dieciseisavos"):
-        ctk.CTkButton(ventana_res, text="Generar Dieciseisavos", width=200,
-            fg_color="#44bb77", command=gen_dieciseisavos).pack(pady=1)
-
-    if ronda_completa("Dieciseisavos") and not hay_partidos_de_fase("Octavos"):
-        ctk.CTkButton(ventana_res, text="Generar Octavos", width=200,
-            fg_color="#44bb77", command=gen_octavos).pack(pady=1)
-
-    if ronda_completa("Octavos") and not hay_partidos_de_fase("Cuartos"):
-        ctk.CTkButton(ventana_res, text="Generar Cuartos", width=200,
-            fg_color="#44bb77", command=gen_cuartos).pack(pady=1)
-
-    if ronda_completa("Cuartos") and not hay_partidos_de_fase("Semifinal"):
-        ctk.CTkButton(ventana_res, text="Generar Semifinal", width=200,
-            fg_color="#44bb77", command=gen_semifinal).pack(pady=1)
-
-    if ronda_completa("Semifinal") and not hay_partidos_de_fase("Final"):  #no hace falta verificar nada del tercer puesto poeque se generan juntos
-        ctk.CTkButton(ventana_res, text="Generar Final y Tercer puesto", width=200,
-            fg_color="#44bb77", command=gen_final).pack(pady=1)
-        
-
-
     ctk.CTkButton(
         ventana_res,
         text="Volver",
@@ -451,8 +511,64 @@ def abrir_resultados():
         fg_color="transparent",
         border_width=1,
         command=ventana_res.destroy
-    ).pack(pady=2)
+    ).pack(pady=4)
+    
+    actualizar_lista()  #para que al abrir la ventana ya aparezcan los partidos disponibles
 
+    frame_botones=ctk.CTkFrame(ventana_res, fg_color="transparent")
+    frame_botones.pack()
+    
+
+    def refrescar_botones():
+        for widget in frame_botones.winfo_children():   #winfo_children devuelve una lista con todos los widgets, en este caso botones, que estan en ese frame
+            widget.destroy()   #elimina los botones para que no se acumulen
+
+
+        if grupos_completos() and not hay_partidos_de_fase("Dieciseisavos"):
+            ctk.CTkButton(frame_botones, text="Asignar equipos - Dieciseisavos", width=200,
+                fg_color="#44bb77", command=gen_dieciseisavos).pack(pady=1)
+
+        if ronda_completa("Dieciseisavos") and not hay_partidos_de_fase("Octavos"):
+            ctk.CTkButton(frame_botones, text="Asignar equipos - Octavos", width=200,
+                fg_color="#44bb77", command=gen_octavos).pack(pady=1)
+
+        if ronda_completa("Octavos") and not hay_partidos_de_fase("Cuartos"):
+            ctk.CTkButton(frame_botones, text="Asignar equipos - Cuartos", width=200,
+                fg_color="#44bb77", command=gen_cuartos).pack(pady=1)
+
+        if ronda_completa("Cuartos") and not hay_partidos_de_fase("Semifinal"):
+            ctk.CTkButton(frame_botones, text="Asignar equipos - Semifinal", width=200,
+                fg_color="#44bb77", command=gen_semifinal).pack(pady=1)
+
+        if ronda_completa("Semifinal") and not hay_partidos_de_fase("Final"):
+            ctk.CTkButton(frame_botones, text="Asignar equipos - Final y Tercer Puesto", width=200,
+                fg_color="#44bb77", command=gen_final).pack(pady=1)
+
+
+
+    def ejecutar_y_refrescar(funcion):   #ejecuta la funcion y refresca las opciones de botones y la lista de partidos
+        funcion()
+        refrescar_botones()
+        actualizar_lista()  #para que se actualice la lista de partidos disponibles una vez que cambia de fase
+
+    #cada funcion asigna los encuentros de los equipos para esa fase y actualiza la ventana
+    def gen_dieciseisavos():
+        ejecutar_y_refrescar(generar_dieciseisavos)
+
+    def gen_octavos():
+        ejecutar_y_refrescar(generar_octavos)
+
+    def gen_cuartos():
+        ejecutar_y_refrescar(generar_cuartos)
+
+    def gen_semifinal():
+        ejecutar_y_refrescar(generar_semifinal)
+
+    def gen_final():
+        ejecutar_y_refrescar(generar_final)
+
+    
+    refrescar_botones()  #esto es para que al abrir la ventana aparezcan los botones correspondientes        
     ventana_res.grab_set()
 
 
