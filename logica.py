@@ -77,13 +77,13 @@ def ids_disponibles(fase):   #busca los ids de los partidos aun no registrados e
     if fase not in ids_por_fase:
         return []
 
-    ids_cargados=list(df[df["fase"] == fase]["id_partido"].astype(str))   #filtramos los que ya fueron cargados
+    ids_cargados=list(df[df["fase"]==fase]["id_partido"].astype(str))   #filtramos los que ya fueron cargados
 
     ids_libres=[]
 
     for id in ids_por_fase[fase]:  #busca en la fase seleccionada
         if id not in ids_cargados:
-            ids_libres.append(id)   #los que aun no fueron cargados se agregan a una lista
+            ids_libres.append(id)   #los que aun no fueron cargados se agregan a la lista
 
     return ids_libres
 
@@ -124,10 +124,10 @@ def partidos_sin_resultado(fase):   #la funcion busca entre todos los partidos d
     if fase=="Final y Tercer Puesto":   #cuando fase_actual() devuelve esto, no se encontrara en el excel de esa forma porque estan separados
         partidos=df[
             ((df["fase"]=="Final") | (df["fase"]=="Tercer Puesto")) &    #hay que buscarlos por separados
-            (df["jugado"]==0)
+            (df["jugado"]==0 & df["equipo1"]!="")   #los partidos que se muestran no tienen que estar sin equipos
         ]
     else:
-        partidos=df[(df["fase"]==fase) & (df["jugado"]==0)]
+        partidos=df[(df["fase"]==fase) & (df["jugado"]==0) & (df["equipo1"]!="")]
 
     return partidos
 
@@ -381,7 +381,7 @@ def calcular_clasificados():
     }
 
 
-#cada una de las funciones generar, asigna los equipos a los partidos de cada fase
+#cada una de las funciones generar, asigna los equipos a los partidos de cada fase, es decir, genera los cruces
 
 def generar_dieciseisavos():
     clasificados=calcular_clasificados()   #obtiene los primeros, segundos y 8 mejores terceros
@@ -421,23 +421,17 @@ def generar_dieciseisavos():
 
     #buscamos los partidos de dieciseisavos ya cargados y les asignamos los equipos en orden
 
-    partidos_fase=df[df["fase"]=="Dieciseisavos"].reset_index()#reset index lo guarda con el indice
-    ids=list(equipos_por_partido.keys()) #una lista con el id de los partidos (las keys de cada partido)
-
-    for i in range(len(partidos_fase)):   #modificar el df que contiene a los partidos, le asigna los equipos y un id
-        indice=partidos_fase.loc[i, "index"] 
-        id_partido=ids[i]
-        eq1, eq2 =equipos_por_partido[id_partido] 
-        df.loc[indice, "equipo1"]=eq1
+    for id_partido, (eq1, eq2) in equipos_por_partido.items():   #modificar el df que contiene a los partidos, le asigna los equipos y un id
+        indice=df[df["id_partido"]==id_partido].index[0]   #indice es el indice de la fila
+        df.loc[indice, "equipo1"]=eq1   #se accede a esa fila en esa columna y se asigna el equipo
         df.loc[indice, "equipo2"]=eq2
-        df.loc[indice, "id_partido"]=id_partido
 
     df.to_excel("data/partidos.xlsx", index=False)
 
 
 
 def generar_octavos():    
-    partidos_por_id={   #esta tal cual en el articulo 12.7
+    equipos_por_partido={   #esta tal cual en el articulo 12.7
         "M89": (ganador_partido_por_id("M74"), ganador_partido_por_id("M77")),
         "M90": (ganador_partido_por_id("M73"), ganador_partido_por_id("M75")),
         "M91": (ganador_partido_por_id("M76"), ganador_partido_por_id("M78")),
@@ -449,23 +443,18 @@ def generar_octavos():
     }
 
     df=pd.read_excel("data/partidos.xlsx")
-    partidos_fase=df[df["fase"]=="Octavos"].reset_index()
-    ids=list(partidos_por_id.keys())
-
-    for i in range(len(partidos_fase)):
-        indice=partidos_fase.loc[i, "index"]
-        id_partido=ids[i]
-        eq1, eq2=partidos_por_id[id_partido]
-        df.loc[indice, "equipo1"]=eq1
+    
+    for id_partido, (eq1, eq2) in equipos_por_partido.items():   #modificar el df que contiene a los partidos, le asigna los equipos y un id
+        indice=df[df["id_partido"]==id_partido].index[0]   #indice es el indice de la fila
+        df.loc[indice, "equipo1"]=eq1   #se accede a esa fila en esa columna y se asigna el equipo
         df.loc[indice, "equipo2"]=eq2
-        df.loc[indice, "id_partido"]=id_partido
 
     df.to_excel("data/partidos.xlsx", index=False)
 
 
 
 def generar_cuartos():
-    partidos_por_id={   #tal cual el articulo 12.8
+    equipos_por_partido={   #tal cual el articulo 12.8
         "M97": (ganador_partido_por_id("M89"), ganador_partido_por_id("M90")),
         "M98": (ganador_partido_por_id("M93"), ganador_partido_por_id("M94")),
         "M99": (ganador_partido_por_id("M91"), ganador_partido_por_id("M92")),
@@ -473,39 +462,28 @@ def generar_cuartos():
     }
 
     df=pd.read_excel("data/partidos.xlsx")
-    partidos_fase=df[df["fase"]=="Cuartos"].reset_index()
-    ids=list(partidos_por_id.keys())
-
-
-    for i in range(len(partidos_fase)):
-        indice=partidos_fase.loc[i, "index"]
-        id_partido=ids[i]
-        eq1, eq2=partidos_por_id[id_partido]
-        df.loc[indice, "equipo1"]=eq1
+    
+    for id_partido, (eq1, eq2) in equipos_por_partido.items():   #modificar el df que contiene a los partidos, le asigna los equipos y un id
+        indice=df[df["id_partido"]==id_partido].index[0]   #indice es el indice de la fila
+        df.loc[indice, "equipo1"]=eq1   #se accede a esa fila en esa columna y se asigna el equipo
         df.loc[indice, "equipo2"]=eq2
-        df.loc[indice, "id_partido"]=id_partido
 
     df.to_excel("data/partidos.xlsx", index=False)
 
 
 
 def generar_semifinal():
-    partidos_por_id={     #tal cual el articulo 12.9
+    equipos_por_partido={     #tal cual el articulo 12.9
         "M101": (ganador_partido_por_id("M97"), ganador_partido_por_id("M98")),
         "M102": (ganador_partido_por_id("M99"), ganador_partido_por_id("M100")),
     }
 
     df=pd.read_excel("data/partidos.xlsx")
-    partidos_fase=df[df["fase"]=="Semifinal"].reset_index()
-    ids=list(partidos_por_id.keys())
 
-    for i in range(len(partidos_fase)):
-        indice=partidos_fase.loc[i, "index"]
-        id_partido=ids[i]
-        eq1, eq2=partidos_por_id[id_partido]
-        df.loc[indice, "equipo1"]=eq1
+    for id_partido, (eq1, eq2) in equipos_por_partido.items():   #modificar el df que contiene a los partidos, le asigna los equipos y un id
+        indice=df[df["id_partido"]==id_partido].index[0]   #indice es el indice de la fila
+        df.loc[indice, "equipo1"]=eq1   #se accede a esa fila en esa columna y se asigna el equipo
         df.loc[indice, "equipo2"]=eq2
-        df.loc[indice, "id_partido"]=id_partido
 
     df.to_excel("data/partidos.xlsx", index=False)
 
@@ -517,18 +495,18 @@ def generar_final():
     eq1=ganador_partido_por_id("M101")
     eq2=ganador_partido_por_id("M102")
 
-    final=df[df["fase"]=="Final"].reset_index()
-    if len(final)>0:
-        indice=final.loc[0, "index"]
-        df.loc[indice, "equipo1"]=eq1
-        df.loc[indice, "equipo2"]=eq2
-        df.loc[indice, "id_partido"]="M104"
+    #asignar equipos a la final, buscando por el id del partido
+    indice_final=df[df["id_partido"]=="M104"].index[0]
+    df.loc[indice_final, "equipo1"]=eq1
+    df.loc[indice_final, "equipo2"]=eq2
+
 
     #tercer puesto, tal cual el articulo 12.10
+
     semi1=df[df["id_partido"]=="M101"].iloc[0]  #M101 y M102 son los 2 partidos semifinales
     semi2=df[df["id_partido"]=="M102"].iloc[0]
 
-    #como se los ganadores, los otros tienen que ser los perdedores
+    #como eq1 y eq2 son los ganadores, los otros tienen que ser los perdedores
     if eq1==semi1["equipo1"]:
         eq3=semi1["equipo2"]
     else:
@@ -539,15 +517,13 @@ def generar_final():
     else:
         eq4=semi2["equipo1"]
     
-    #asignar equipos al tercer puesto
-    tercero=df[df["fase"]=="Tercer Puesto"].reset_index()
-    if len(tercero)>0:
-        indice=tercero.loc[0, "index"]
-        df.loc[indice, "equipo1"]=eq3
-        df.loc[indice, "equipo2"]=eq4
-        df.loc[indice, "id_partido"]="M103"   
-
+    #asignar equipos al tercer puesto, buscando por el id del partido
+    indice_tercero=df[df["id_partido"]=="M103"].index[0]
+    df.loc[indice_tercero, "equipo1"]=eq3
+    df.loc[indice_tercero, "equipo2"]=eq4
+      
     df.to_excel("data/partidos.xlsx", index=False)
+
 
 
 #Informe extra, para el final del torneo
