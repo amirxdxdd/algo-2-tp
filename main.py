@@ -608,7 +608,7 @@ def abrir_resultados():
 def abrir_informes():
     ventana_informes=ctk.CTkToplevel(ventana)   #Igual que abrir configuracion
     ventana_informes.title("Emision de Informes")
-    ventana_informes.geometry("600x550")
+    ventana_informes.geometry("600x600")
     ventana_informes.resizable(False, False)
 
     construir_header(ventana_informes, "Emision de informes")
@@ -621,8 +621,7 @@ def abrir_informes():
         ("Tabla de posiciones por grupo", abrir_informe2),
         ("Resultados por equipo", abrir_informe3),
         ("Proximo partido por equipo", abrir_informe4),
-        ("Tabla de todos los grupos",abrir_informe5),
-        ("Volver", ventana_informes.destroy),
+        ("Tabla de todos los grupos",abrir_informe5)
     ]
 
     for texto, comando in opciones_informes:
@@ -634,6 +633,27 @@ def abrir_informes():
             font=ctk.CTkFont(size=13),
             command=comando
         ).pack(pady=7)
+
+
+    if fase_actual()=="Torneo finalizado":   #lo pongo aparte para que aparezca solo si el torneo termino
+        ctk.CTkButton(
+            frame_informes,
+            text="Resumen del Torneo",
+            width=320,
+            height=44,
+            font=ctk.CTkFont(size=13),
+            command=abrir_resumen
+        ).pack(pady=7)
+
+
+    ctk.CTkButton(
+        ventana_informes,
+        text="Volver",
+        width=150,
+        fg_color="transparent",
+        border_width=1,
+        command=ventana_informes.destroy
+    ).pack(pady=7)
 
     ventana_informes.grab_set()
 
@@ -981,6 +1001,26 @@ def abrir_informe5():
 
     ventana_inf5.grab_set()
 
+
+
+def abrir_resumen():
+    ventana_res2=ctk.CTkToplevel(ventana)
+    ventana_res2.title("Resumen del Torneo")
+    ventana_res2.geometry("600x600")
+    ventana_res2.resizable(False, False)
+
+    construir_header(ventana_res2, "Resumen del Torneo")
+    
+    textbox=ctk.CTkTextbox(ventana_res2, width=540, height=400, font=ctk.CTkFont(family="Courier", size=12))
+    textbox.pack(pady=20)    #la funete courier es linda
+
+    textbox.insert("end", generar_resumen())
+    textbox.configure(state="disabled")
+
+    ctk.CTkButton(ventana_res2, text="Volver", width=150, fg_color="transparent",
+        border_width=1, command=ventana_res2.destroy).pack()
+
+    ventana_res2.grab_set()
 
 
 

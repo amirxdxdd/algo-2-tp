@@ -548,3 +548,115 @@ def generar_final():
         df.loc[indice, "id_partido"]="M103"   
 
     df.to_excel("data/partidos.xlsx", index=False)
+
+
+#Informe extra, para el final del torneo
+
+def generar_resumen():
+    df_partidos=pd.read_excel("data/partidos.xlsx")   
+    df_equipos=pd.read_excel("data/equipos.xlsx")
+    stats=calcular_stats()
+    grupos=sorted(df_equipos["grupo"].unique())  #obtiene los grupos ordenados y sin repetir
+
+    resumen="RESUMEN DEL TORNEO\n"
+    resumen+="─" * 50 + "\n\n"
+    resumen+=f"48 selecciones participaron en el torneo.\n\n"
+
+    #fase de grupos
+    resumen+="FASE DE GRUPOS\n"
+    resumen+="─" * 50 + "\n"
+    for grupo in grupos:   #ordenar cada grupo
+        df_grupo=stats[stats["grupo"]==grupo].sort_values(
+            by=["puntos", "dg", "gf", "prefijo"],
+            ascending=[False, False, False, False]
+        )
+        primero=df_grupo.iloc[0]["pais"]   #tomar el primero y segundo
+        segundo=df_grupo.iloc[1]["pais"]
+        pts=int(df_grupo.iloc[0]["puntos"])  #los puntos del primero
+        resumen+=f"Grupo {grupo}: {primero} primero con {pts} puntos, {segundo} segundo.\n"
+
+    resumen+="\n"
+
+    #fases eliminatorias
+    fases=["Dieciseisavos", "Octavos", "Cuartos", "Semifinal"]
+    nombres={
+        "Dieciseisavos": "DIECISEISAVOS DE FINAL",
+        "Octavos": "OCTAVOS DE FINAL",
+        "Cuartos": "CUARTOS DE FINAL",
+        "Semifinal": "SEMIFINAL"
+    }
+
+    for fase in fases:  
+        partidos_fase=df_partidos[df_partidos["fase"]==fase]  #para cada fase, se filtran todos los partidos que sean de esa fase
+
+        if len(partidos_fase)>0:
+            resumen+=f"{nombres[fase]}\n"
+            resumen+="─"*50 + "\n"
+
+            for i in range(len(partidos_fase)):   #recorrer cada partido de la fase
+                fila=partidos_fase.iloc[i]   #leer fila por fila cada partido
+                pais1=obtener_pais(fila["equipo1"])
+                pais2=obtener_pais(fila["equipo2"])
+                g1=int(fila["goles1"])
+                g2=int(fila["goles2"])
+                ganador=obtener_pais(ganador_partido(fila))   #con el id del equipo se obtiene el pais
+                if g1==g2:
+                    pen1=int(fila["penales1"])
+                    pen2=int(fila["penales2"])            
+                    resumen+=f"{ganador} elimino a {pais2 if ganador==pais1 else pais1} ({g1}-{g2}, penales {pen1}-{pen2})\n"     #pais 2 sera el ganador almenos que pais 1 lo sea
+                else:
+                    if ganador==pais1:
+                        eliminado=pais2
+                    else:
+                        eliminado=pais1
+                    resumen+=f"{ganador} elimino a {eliminado} ({g1}-{g2})\n"
+                    
+            resumen+="\n"
+
+    #tercer puesto
+    tercero_partido=df_partidos[df_partidos["fase"]=="Tercer Puesto"]
+    if len(tercero_partido)>0:
+        fila=tercero_partido.iloc[0]
+        pais1=obtener_pais(fila["equipo1"])
+        pais2=obtener_pais(fila["equipo2"])
+        g1=int(fila["goles1"])
+        g2=int(fila["goles2"])
+        ganador=obtener_pais(ganador_partido(fila))
+        if ganador==pais1:
+            perdedor=pais2 
+        else:
+            perdedor=pais1
+
+        resumen+="TERCER PUESTO\n"
+        resumen+="─" * 50 + "\n"
+        resumen+=f"{ganador} gano el tercer puesto ante {perdedor} ({g1}-{g2})\n\n"
+
+    #final, igual que las fases eliminatorias, pero al final, para mas placer
+    final_partido=df_partidos[df_partidos["fase"]=="Final"]
+    if len(final_partido)>0:
+        fila=final_partido.iloc[0]
+        pais1=obtener_pais(fila["equipo1"])
+        pais2=obtener_pais(fila["equipo2"])
+        g1=int(fila["goles1"])
+        g2=int(fila["goles2"])
+        campeon=obtener_pais(ganador_partido(fila))
+
+        if campeon==pais1:
+            vice=pais2
+        else:
+            vice=pais1
+        
+        resumen+="FINAL\n"
+        resumen+="─" * 50 + "\n"
+        resumen+=f"La final fue {pais1} vs {pais2}\n"
+
+        if g1==g2:
+            pen1=int(fila["penales1"])
+            pen2=int(fila["penales2"])
+            resumen+=f"{campeon} gano la final por penales ({g1}-{g2}, penales {pen1}-{pen2})\n"
+        else:
+            resumen+=f"{campeon} gano la final {g1}-{g2}\n"
+
+        resumen+=f"{vice} fue viceampeon\n"
+
+    return resumen
