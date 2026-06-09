@@ -62,11 +62,39 @@ def ver_equipos():
 
 
 
-
-def ingresar_partido(fecha, hora, lugar, equipo1, equipo2, fase):
+def ids_disponibles(fase):   #busca los ids de los partidos aun no registrados en el calendario
     df=pd.read_excel("data/partidos.xlsx")
-    df.loc[len(df)]=[fecha, hora, lugar, equipo1, equipo2, 0, 0, 0, 0, fase, 0, ""]
+    
+    ids_por_fase={
+        "Dieciseisavos": ["M73","M74","M75","M76","M77","M78","M79","M80","M81","M82","M83","M84","M85","M86","M87","M88"],
+        "Octavos": ["M89","M90","M91","M92","M93","M94","M95","M96"],
+        "Cuartos": ["M97","M98","M99","M100"],
+        "Semifinal": ["M101","M102"],
+        "Final": ["M104"],
+        "Tercer Puesto": ["M103"]
+    }
+
+    if fase not in ids_por_fase:
+        return []
+
+    ids_cargados=list(df[df["fase"] == fase]["id_partido"].astype(str))   #filtramos los que ya fueron cargados
+
+    ids_libres=[]
+
+    for id in ids_por_fase[fase]:  #busca en la fase seleccionada
+        if id not in ids_cargados:
+            ids_libres.append(id)   #los que aun no fueron cargados se agregan a una lista
+
+    return ids_libres
+
+
+def ingresar_partido(fecha, hora, lugar, equipo1, equipo2, fase, id_partido=""):
+    df=pd.read_excel("data/partidos.xlsx")
+    df.loc[len(df)]=[fecha, hora, lugar, equipo1, equipo2, 0, 0, 0, 0, fase, 0, id_partido]
     df.to_excel("data/partidos.xlsx", index=False)
+
+
+
 
 def ver_partidos():
     df = pd.read_excel("data/partidos.xlsx")

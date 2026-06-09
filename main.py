@@ -196,7 +196,7 @@ def abrir_ingresar_partido_grupos():
 def abrir_ingresar_partido_eliminatorio():
     ventana_elim=ctk.CTkToplevel(ventana)
     ventana_elim.title("Ingresar Partido - Eliminatorio")
-    ventana_elim.geometry("500x550")
+    ventana_elim.geometry("500x600")
     ventana_elim.resizable(False, False)
 
     construir_header(ventana_elim, "Ingresar Partido - Eliminatorio")
@@ -204,14 +204,36 @@ def abrir_ingresar_partido_eliminatorio():
     frame_form=ctk.CTkFrame(ventana_elim, fg_color="transparent")
     frame_form.pack(padx=40, pady=20, fill="x")
 
+
+    partidos_disponibles_ids=[None]   #uso listas porque funcionan como variable global para que se guarde al modificarlo en las funciones
+
+    def actualizar_ids(fase):  #al seleccionar una fase, actualiza la lista de ids
+        ids=ids_disponibles(fase) 
+        partidos_disponibles_ids[0]=ids
+        if len(ids)==0:
+            selector_id.configure(values=["No hay partidos disponibles"])   #si no hay, pone eso como una opcion
+            selector_id.set("No hay partidos disponibles")   #selecciona esa unica opcion
+        else:
+            selector_id.configure(values=ids)  #si hay, muestra todos los que hay
+            selector_id.set(ids[0])   #selecciona la primera
+
+    def al_cambiar_fase(fase):   #cada vez que se cambia de fase se actualiza la lista de ids
+        actualizar_ids(fase)
+
+
     #selector de fase
     ctk.CTkLabel(frame_form, text="Fase", anchor="w").pack(fill="x", pady=(4, 2))
     selector_fase=ctk.CTkOptionMenu(   #un pequeño menu que se abrira para seleccionar fase
         frame_form,
         values=["Dieciseisavos", "Octavos", "Cuartos", "Semifinal", "Final", "Tercer Puesto"],
-        width=340
+        width=340,
+        command=al_cambiar_fase
     )
     selector_fase.pack()
+
+    ctk.CTkLabel(frame_form, text="ID del partido", anchor="w").pack(fill="x", pady=(8,2))   #aca ira el otro minimenu donde estaran los ids disponibles para la fase seleccionada
+    selector_id=ctk.CTkOptionMenu(frame_form, values=[""], width=340)
+    selector_id.pack()
 
     campos=["Fecha (DD/MM/AAAA)", "Hora (HH:MM)", "Lugar"]
     entradas={}
@@ -227,22 +249,29 @@ def abrir_ingresar_partido_eliminatorio():
 
     def guardar():
         fase=selector_fase.get()
+        id_partido=selector_id.get()
         fecha=entradas["Fecha (DD/MM/AAAA)"].get().strip()
         hora=entradas["Hora (HH:MM)"].get().strip()
         lugar=entradas["Lugar"].get().strip()
+
+        if id_partido=="No hay partidos disponibles":
+            label_mensaje.configure(text="No hay partidos para esa fase")
+            return
 
         if fecha=="" or hora=="" or lugar=="":
             label_mensaje.configure(text="Completa todos los campos.", text_color="#e94560")
             return
 
         #equipos vacios, se asignaran al generar la fase
-        ingresar_partido(fecha, hora, lugar, "", "", fase)
+        ingresar_partido(fecha, hora, lugar, "", "", fase, id_partido)
         label_mensaje.configure(text="Partido guardado correctamente.", text_color="#44bb77")
+        actualizar_ids(fase)   #para que una vez ingresado, ya no este disponible
 
-    ctk.CTkButton(ventana_elim, text="Guardar Partido", width=200, command=guardar).pack(pady=4)
+    ctk.CTkButton(ventana_elim, text="Guardar Partido", width=200, command=guardar).pack(pady=1)
     ctk.CTkButton(ventana_elim, text="Volver", width=200, fg_color="transparent",
         border_width=1, command=ventana_elim.destroy).pack(pady=4)
 
+    actualizar_ids(generar_dieciseisavos)   #al abrir la ventana, automaticamente la lista se refresca, por defecto en diesiceisavos
     ventana_elim.grab_set()    
 
 
@@ -256,8 +285,8 @@ def abrir_ver_equipos():
 
     construir_header(ventana_equipos, "Ver equipos")
 
-    #ctktextbox crea un cuadro de texto para guardar datos
-    textbox = ctk.CTkTextbox(ventana_equipos, width=660, height=500, font=ctk.CTkFont(family="Courier", size=12))
+    #ctktextbox crea un cuadro de texto para mostrar datos
+    textbox=ctk.CTkTextbox(ventana_equipos, width=660, height=500, font=ctk.CTkFont(family="Courier", size=12))
     textbox.pack(pady=20)
 
     df=ver_equipos()  #guardo el contenido del excel en el dataframe df
