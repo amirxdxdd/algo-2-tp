@@ -1,7 +1,7 @@
 import pandas as pd
 import os
 from datetime import datetime
-def calcular_stats():   #Para la fase de grupos, devuelve una tabla similar a la de equipos, pero con la informacion necesaria para hacer calculos
+def calcular_stats():   
     equipos=pd.read_excel("data/equipos.xlsx")
     partidos=pd.read_excel("data/partidos.xlsx")
     stats = equipos.copy()  #copiamos la tabla de equipos
@@ -16,7 +16,7 @@ def calcular_stats():   #Para la fase de grupos, devuelve una tabla similar a la
         local=partidos[partidos["equipo1"] == eid]    #con local y visitante me refiero a los partidos
         visitante=partidos[partidos["equipo2"] == eid] #en donde el equipo fue el equipo 1 o el 2
 
-        pj=len(local)+len(visitante)
+        pj=len(partidos[((partidos["equipo1"]==eid) | (partidos["equipo2"]==eid)) & (partidos["jugado"]==1)])   #cuenta la cantidad de partidos jugados, revisando en eq1 0 eq2, y jugado
         gf=int(local["goles1"].sum()) + int(visitante["goles2"].sum())
         gc=int(local["goles2"].sum()) + int(visitante["goles1"].sum())
 
@@ -299,6 +299,9 @@ def informe_proximo_partido(pais_buscado, fecha_buscada):   #Informe 4
 
 def informe_todos_los_grupos():  #Informe 5
     df=calcular_stats()
+    cols = ["dg", "gf", "prefijo"]
+    df[cols] = df[cols].astype(int)
+
     grupos=sorted(df["grupo"].unique())  #obtiene los grupos sin repetir en orden
     resultado={}
 
