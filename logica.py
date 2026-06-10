@@ -98,7 +98,8 @@ def ingresar_partido(fecha, hora, lugar, equipo1, equipo2, fase, id_partido=""):
 
 
 def ver_partidos():
-    df = pd.read_excel("data/partidos.xlsx")
+    df=pd.read_excel("data/partidos.xlsx")
+    df["fecha"] = df["fecha"].dt.strftime("%d/%m/%Y")
     return df
 
 

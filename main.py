@@ -311,12 +311,12 @@ def abrir_ver_equipos():
 def abrir_ver_partidos():
     ventana_partidos = ctk.CTkToplevel(ventana)   #Igual que todas las ventanas
     ventana_partidos.title("Ver Partidos")
-    ventana_partidos.geometry("900x800")
+    ventana_partidos.geometry("1200x800")
     ventana_partidos.resizable(False, False)
 
     construir_header(ventana_partidos, "Ver partidos")
 
-    textbox=ctk.CTkTextbox(ventana_partidos, width=860, height=600, font=ctk.CTkFont(family="Courier", size=12))   #Courier queda lindo
+    textbox=ctk.CTkTextbox(ventana_partidos, width=1150, height=600, font=ctk.CTkFont(family="Courier", size=12))   #Courier queda lindo
     textbox.pack(pady=20)
 
     df=ver_partidos()  #Guarda el contenido del excel en el df
@@ -482,7 +482,7 @@ def abrir_resultados():
         entrada=ctk.CTkEntry(frame_form, width=340)
         entrada.pack()
         entradas[campo]=entrada
-
+    
 
     label_mensaje=ctk.CTkLabel(ventana_res, text="", text_color="#aaaaaa")
     label_mensaje.pack(pady=(6,2))  #mensaje donde avisara si hubo error o si se registro correctamente
@@ -521,6 +521,7 @@ def abrir_resultados():
         label_mensaje.configure(text="Resultado registrado correctamente.", text_color="#44bb77")
 
         for entry in entradas.values():
+            entry.configure(state="normal")  #por si esta desyabilitado su escritura
             entry.delete(0, "end")
 
         actualizar_lista()   #quita el partido que se acaba de ingresar de la lista de partidos disponibles
@@ -552,6 +553,21 @@ def abrir_resultados():
     def refrescar_botones():
         for widget in frame_botones.winfo_children():   #winfo_children devuelve una lista con todos los widgets, en este caso botones, que estan en ese frame
             widget.destroy()   #elimina los botones para que no se acumulen
+
+
+        
+
+        entradas["Penales Equipo 1"].configure(state="normal")
+        entradas["Penales Equipo 2"].configure(state="normal")
+
+        entradas["Penales Equipo 1"].delete(0, "end")
+        entradas["Penales Equipo 2"].delete(0, "end")
+        if fase_actual()=="Grupos":    #en la fase de grupos no hay penales, se puede deshabilitar y poner 0
+            entradas["Penales Equipo 1"].insert(0,"0")
+            entradas["Penales Equipo 2"].insert(0,"0")
+            entradas["Penales Equipo 1"].configure(state="disabled")
+            entradas["Penales Equipo 2"].configure(state="disabled")
+
 
         print(f"grupos_completos: {grupos_completos()}")
         print(f"hay_partidos_de_fase Dieciseisavos: {hay_partidos_de_fase('Dieciseisavos')}")
@@ -898,14 +914,14 @@ def abrir_informe3():
 
 
 def abrir_informe4():
-    ventana_inf4 = ctk.CTkToplevel(ventana)
+    ventana_inf4=ctk.CTkToplevel(ventana)
     ventana_inf4.title("Proximo partido")
     ventana_inf4.geometry("600x600")
     ventana_inf4.resizable(False, False)
 
     construir_header(ventana_inf4, "Proximo partido")
 
-    frame_input = ctk.CTkFrame(ventana_inf4, fg_color="transparent")
+    frame_input=ctk.CTkFrame(ventana_inf4, fg_color="transparent")
     frame_input.pack(pady=20)
 
     #pide el pais
@@ -923,10 +939,10 @@ def abrir_informe4():
     textbox.configure(state="disabled")
 
     def buscar():
-        pais_buscado  = entrada_pais.get().strip()
-        fecha_buscada = entrada_fecha.get().strip()
+        pais_buscado=entrada_pais.get().strip()
+        fecha_buscada=entrada_fecha.get().strip()
 
-        if pais_buscado == "" or fecha_buscada == "":
+        if pais_buscado=="" or fecha_buscada=="":
             return
 
         resultado=informe_proximo_partido(pais_buscado, fecha_buscada)
@@ -935,7 +951,7 @@ def abrir_informe4():
         textbox.delete("1.0", "end")
 
         if resultado is None:
-            textbox.insert("end", f"No existe el equipo {pais_buscado}")
+            textbox.insert("end", f"No existe el equipo {pais_buscado} o no tiene partidos proximos al {fecha_buscada}")
 
         else:
             pais1 = obtener_pais(resultado["equipo1"])
