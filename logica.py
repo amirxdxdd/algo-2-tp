@@ -157,14 +157,13 @@ def avance_maximo(id_eq):   #maximo avance de un equipo, para el informe 3
     for fase in fases:
         partidos_fase=df[
             ((df["equipo1"]==id_eq) | (df["equipo2"]==id_eq)) &   #filtrar para que sea eq1 o 2, la fase y que ya se haya jugado
-            (df["fase"]==fase) &
-            (df["jugado"]==1)
-        ]
+            (df["fase"]==fase)]
+        
         if len(partidos_fase)>0:
             ultimo_avance=fase
 
     #si llego a la final, verificamos si gano o perdio (campeon o vicecampeon)
-    final=df[(df["fase"]=="Final") & (df["jugado"]==1)]
+    final=df[(df["fase"]=="Final") ]
     if len(final)>0:
         fila_final=final.iloc[0]
         if ganador_partido(fila_final)==id_eq:  #si gano
