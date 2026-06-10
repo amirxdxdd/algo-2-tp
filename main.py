@@ -552,6 +552,8 @@ def abrir_resultados():
         for widget in frame_botones.winfo_children():   #winfo_children devuelve una lista con todos los widgets, en este caso botones, que estan en ese frame
             widget.destroy()   #elimina los botones para que no se acumulen
 
+        print(f"grupos_completos: {grupos_completos()}")
+        print(f"hay_partidos_de_fase Dieciseisavos: {hay_partidos_de_fase('Dieciseisavos')}")
 
         if grupos_completos() and not hay_partidos_de_fase("Dieciseisavos"):
             ctk.CTkButton(frame_botones, text="Asignar equipos - Dieciseisavos", width=200,
@@ -676,7 +678,7 @@ def abrir_informe1():
         text="Fecha (DD/MM/AAAA):",
     ).pack(side="left", padx=(0, 10))  #side="left" pone la etiqueta a la izquierda del cuadro entry
 
-    entrada_fecha = ctk.CTkEntry(frame_input, width=150)
+    entrada_fecha=ctk.CTkEntry(frame_input, width=150)
     entrada_fecha.pack(side="left")  #el entry queda a la derecha del label
 
     #cuadro donde se muestran los resultados
@@ -702,9 +704,8 @@ def abrir_informe1():
 
             for i in range(len(df)):
                 fila=df.iloc[i]   #Va recorriendo el df por filas
-                pais1 = obtener_pais(fila['equipo1'])   #busca el pais que tiene el id del equipo
-                pais2 = obtener_pais(fila['equipo2'])
-
+                pais1=obtener_pais(fila['equipo1'])   #busca el pais que tiene el id del equipo
+                pais2=obtener_pais(fila['equipo2'])
                 textbox.insert("end", f"{fila['hora']} hs — {fila['lugar']}\n") #Inserta dentro del cuadro de texto (Imprime)
                 
                 textbox.insert("end", f"  {pais1}  {int(fila['goles1'])} : {int(fila['goles2'])}  {pais2}\n")
@@ -857,7 +858,7 @@ def abrir_informe3():
             elif avance=="Vicecampeon":
                 textbox.insert("end", "Vicecampeon del Mundial\n")
             elif avance=="Fase de Grupos":
-                textbox.insert("end", "Eliminado en Fase de Grupos\n")
+                textbox.insert("end", "Maximo avance: Fase de Grupos\n")
             else:
                 textbox.insert("end", f"Clasificado a {avance}\n")
 

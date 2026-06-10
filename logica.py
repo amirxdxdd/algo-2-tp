@@ -1,5 +1,6 @@
 import pandas as pd
 import os
+from datetime import datetime
 def calcular_stats():   #Para la fase de grupos, devuelve una tabla similar a la de equipos, pero con la informacion necesaria para hacer calculos
     equipos=pd.read_excel("data/equipos.xlsx")
     partidos=pd.read_excel("data/partidos.xlsx")
@@ -120,14 +121,14 @@ def fase_actual():    #Simplemente retorna la fase actual del toreno
 
 def partidos_sin_resultado(fase):   #la funcion busca entre todos los partidos de una fase que no hayan sido jugados
     df=pd.read_excel("data/partidos.xlsx")
-
+    df["equipo1"]=df["equipo1"].fillna("")   #las columnas nulas, no son "" para pandas, hay que reemplazarlo para trabajar con ellas
     if fase=="Final y Tercer Puesto":   #cuando fase_actual() devuelve esto, no se encontrara en el excel de esa forma porque estan separados
         partidos=df[
             ((df["fase"]=="Final") | (df["fase"]=="Tercer Puesto")) &    #hay que buscarlos por separados
-            (df["jugado"]==0 & df["equipo1"]!="")   #los partidos que se muestran no tienen que estar sin equipos
+            (df["jugado"]==0) & (df["equipo1"]!="")   #los partidos que se muestran no tienen que estar sin equipos
         ]
     else:
-        partidos=df[(df["fase"]==fase) & (df["jugado"]==0) & (df["equipo1"]!="")]
+        partidos=df[(df["fase"]==fase) & (df["jugado"] == 0) & (df["equipo1"] != "")]
 
     return partidos
 
@@ -186,8 +187,9 @@ def avance_maximo(id_eq):   #maximo avance de un equipo, para el informe 3
 #Dataframes de informes
 def informe_partidos_por_fecha(fecha): #Informe 1
      df=pd.read_excel("data/partidos.xlsx")
-     df["fecha"]=df["fecha"].astype(str)  #se connvierte a cadena para comparar sin problemas
-     fechas=df[df["fecha"] == fecha]  #Filtra las fechas que coincidan con el parametro
+     fecha=datetime.strptime(fecha, "%d/%m/%Y")
+     df["fecha"]=pd.to_datetime(df["fecha"], dayfirst=True)  #se connvierte a cadena para comparar sin problemas
+     fechas=df[df["fecha"]==fecha]  #Filtra las fechas que coincidan con el parametro
      return fechas
 
 
@@ -230,8 +232,7 @@ def informe_proximo_partido(pais_buscado, fecha_buscada):   #Informe 4
     partidos=pd.read_excel("data/partidos.xlsx")
     equipos=pd.read_excel("data/equipos.xlsx")
 
-    eq=equipos[equipos["pais"].str.upper() == pais_buscado.upper()]
-    print(f"Equipo encontrado: {eq}")
+    eq=equipos[equipos["pais"].str.upper()==pais_buscado.upper()]
 
     if len(eq)==0:
         return None  #por si el pais no existe
@@ -297,7 +298,6 @@ def configuracion_cerrada():  #retorna si esta o no cerrada la config
 def grupos_completos():  #con esta funcion verifico si ya fueron jugados los partidos de la fase de grupo para comenzar con la fase eliminatoria
     df=pd.read_excel("data/partidos.xlsx")
     partidos_grupos=df[df["fase"] == "Grupos"]   #df con los partidos de la fase de grupos
-    
     if len(partidos_grupos)==0:
         return False  #si no hay partidos cargados
     
@@ -310,9 +310,9 @@ def grupos_completos():  #con esta funcion verifico si ya fueron jugados los par
 
 
 def hay_partidos_de_fase(fase):
-    df=pd.read_excel("data/partidos.xlsx")
-    return len(df[df["fase"]==fase])>0   #retorna true o false si hay o no partidos de cierta fase, para no generar 2 veces los mismos partidos
-
+    df = pd.read_excel("data/partidos.xlsx")
+    df["equipo1"] = df["equipo1"].fillna("")  #reemplaza nan por string vacio
+    return len(df[(df["fase"]==fase) & (df["equipo1"]!="")]) > 0
 
 def ronda_completa(fase):
     df=pd.read_excel("data/partidos.xlsx")
