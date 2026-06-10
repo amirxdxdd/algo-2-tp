@@ -449,12 +449,12 @@ def abrir_resultados():
             selector_partido.set("No hay partidos disponibles")   #selecciona esa opcion
             return
         
-        opciones=[]   #aca se guardaran los str departidos disponibles
+        opciones=[]   #aca se guardaran los str de partidos disponibles
         for i in range(len(df)):
             fila=df.iloc[i]
             pais1=obtener_pais(fila["equipo1"])
             pais2=obtener_pais(fila["equipo2"])
-            opciones.append(f"{fila['fecha']} {fila['hora']} - {pais1} vs {pais2}")
+            opciones.append(f"{fila['fecha']} {fila['hora']} - {pais1} vs {pais2}   -   {fila['fase']}")
 
         selector_partido.configure(values=opciones)
         selector_partido.set(opciones[0])  #selecciona el primer partido automaticamente
@@ -462,6 +462,7 @@ def abrir_resultados():
     fase=fase_actual()
 
     if fase=="Torneo finalizado":
+        selector_partido=ctk.CTkOptionMenu(frame_form, values=[""], width=340)
         ctk.CTkLabel(frame_form, text="El torneo ha finalizado",
                      text_color="#44bb77", font=ctk.CTkFont(size=13)).pack(pady=10)
     else:   #Muestra la fase actual y el selector de partidos disponibles
@@ -857,7 +858,7 @@ def abrir_informe3():
                 textbox.insert("end", "Campeon del Mundial\n")
             elif avance=="Vicecampeon":
                 textbox.insert("end", "Vicecampeon del Mundial\n")
-            elif avance=="Fase de Grupos":
+            elif avance=="Grupos":
                 textbox.insert("end", "Maximo avance: Fase de Grupos\n")
             else:
                 textbox.insert("end", f"Clasificado a {avance}\n")

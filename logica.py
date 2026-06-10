@@ -128,8 +128,9 @@ def partidos_sin_resultado(fase):   #la funcion busca entre todos los partidos d
             (df["jugado"]==0) & (df["equipo1"]!="")   #los partidos que se muestran no tienen que estar sin equipos
         ]
     else:
-        partidos=df[(df["fase"]==fase) & (df["jugado"] == 0) & (df["equipo1"] != "")]
+        partidos=df[(df["fase"]==fase) & (df["jugado"]==0) & (df["equipo1"]!= "")]
 
+    partidos["fecha"]=partidos["fecha"].dt.strftime('%d/%m/%Y')  #para mostrar bien la hora
     return partidos
 
 
@@ -188,7 +189,7 @@ def avance_maximo(id_eq):   #maximo avance de un equipo, para el informe 3
 def informe_partidos_por_fecha(fecha): #Informe 1
      df=pd.read_excel("data/partidos.xlsx")
      fecha=datetime.strptime(fecha, "%d/%m/%Y")
-     df["fecha"]=pd.to_datetime(df["fecha"], dayfirst=True)  #se connvierte a cadena para comparar sin problemas
+     df["fecha"]=pd.to_datetime(df["fecha"], dayfirst=True)  #se connvierte a datetime ambos para comparar sin problemas
      fechas=df[df["fecha"]==fecha]  #Filtra las fechas que coincidan con el parametro
      return fechas
 
