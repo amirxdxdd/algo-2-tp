@@ -747,11 +747,21 @@ def abrir_informe2():
 
     ctk.CTkLabel(
         frame_input,
-        text="Grupo (ej: A):",
+        text="Grupo:",
     ).pack(side="left", padx=(0, 10))
 
     entrada_grupo=ctk.CTkEntry(frame_input, width=80)
     entrada_grupo.pack(side="left")
+
+    ctk.CTkLabel(
+        frame_input,
+        text="Fecha (DD/MM/AAAA):",
+    ).pack(side="left", padx=(10, 10))
+
+    entrada_fecha=ctk.CTkEntry(frame_input, width=80)
+    entrada_fecha.pack(side="left")
+
+
 
     textbox=ctk.CTkTextbox(ventana_inf2, width=540, height=280, font=ctk.CTkFont(family="Courier", size=12))
     textbox.pack(pady=(0, 10))
@@ -759,11 +769,12 @@ def abrir_informe2():
 
     def buscar():
         grupo=entrada_grupo.get().strip()
+        fecha=entrada_fecha.get().strip()
 
-        if grupo=="":
+        if grupo=="" or fecha=="":
             return
 
-        df=informe_tabla_grupo(grupo)
+        df=informe_tabla_grupo(grupo, fecha)
 
         textbox.configure(state="normal")
         textbox.delete("1.0", "end")

@@ -195,10 +195,43 @@ def informe_partidos_por_fecha(fecha): #Informe 1
 
 
 
-def informe_tabla_grupo(grupo):   #Informe 2
-    df=calcular_stats()
-    df=df[df["grupo"]==grupo.upper()]
-    
+def informe_tabla_grupo(grupo, fecha):   #Informe 2
+    partidos=pd.read_excel("data/partidos.xlsx")
+    equipos=pd.read_excel("data/equipos.xlsx")
+
+    partidos["fecha"]=pd.to_datetime(partidos["fecha"], dayfirst=True)
+    fecha_dt=pd.to_datetime(fecha, dayfirst=True)
+    partidos=partidos[partidos["fecha"]<=fecha_dt]   #se queda solo con los partidos que estan antes de la fecha ingresada
+
+    stats=equipos.copy()
+    stats["pj"]=0
+    stats["gf"]=0
+    stats["gc"]=0
+    stats["puntos"]=0    #hay que calcular las estadisticas al igual que con la funcion
+
+    for eid in equipos["id"]:
+        local=partidos[partidos["equipo1"]==eid]   #busca los partidos en donde fue eq1
+        visitante=partidos[partidos["equipo2"]==eid]   #busca los partidos en donde fue eq2
+
+        pj=len(local)+len(visitante)
+        gf=int(local["goles1"].sum())+int(visitante["goles2"].sum())   #la cantidad de goles a favor, ya sea como eq1 o 2
+        gc= int(local["goles2"].sum())+int(visitante["goles1"].sum())   #los goles en contra
+
+        puntos=int((local["goles1"]>local["goles2"]).sum())*3
+        puntos+=int((local["goles1"]==local["goles2"]).sum())*1
+        puntos+=int((visitante["goles2"]>visitante["goles1"]).sum())*3
+        puntos+=int((visitante["goles2"]==visitante["goles1"]).sum())*1
+
+        stats.loc[stats["id"]==eid, "pj"]=pj
+        stats.loc[stats["id"]==eid, "gf"]=gf
+        stats.loc[stats["id"]==eid, "gc"]=gc
+        stats.loc[stats["id"]==eid, "puntos"]=puntos
+
+    stats["dg"]=stats["gf"]-stats["gc"]    #se crea la columna entera dg
+
+    df=stats[stats["grupo"]==grupo.upper()]   #agarra solo el grupo ingresado
+
+
     if len(df)==0:
         return None #devuelve None si el grupo no existe
     
