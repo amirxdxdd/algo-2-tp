@@ -875,6 +875,7 @@ def abrir_informe3():
 
             for i in range(len(df)):   #similar al informe 1
                 fila=df.iloc[i]
+                fila["fecha"]=fila["fecha"].date()  #pasar a str
                 pais1=obtener_pais(fila["equipo1"])
                 pais2=obtener_pais(fila["equipo2"])
                 textbox.insert("end", f"{fila['fecha']} — {fila['fase']}\n")

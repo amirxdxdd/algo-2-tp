@@ -4,6 +4,7 @@ from datetime import datetime
 def calcular_stats():   
     equipos=pd.read_excel("data/equipos.xlsx")
     partidos=pd.read_excel("data/partidos.xlsx")
+    partidos=partidos[partidos["jugado"]==1]
     stats = equipos.copy()  #copiamos la tabla de equipos
 
     stats["pj"]=0     #estas columnas son solamente auxiliares
@@ -253,7 +254,7 @@ def informe_resultados_equipo(pais_buscado):  #Informe 3
 
     id_eq=eq.iloc[0]["id"]
 
-    todos=partidos[(partidos["equipo1"] == id_eq) | (partidos["equipo2"] == id_eq)]  #El | es el or logico, como en c
+    todos=partidos[((partidos["equipo1"]==id_eq) | (partidos["equipo2"]==id_eq)) & (partidos["jugado"]==1)]  #El | es el or logico, como en c
     todos=todos.sort_values(by="fecha")  #para que se muestre ordenado
     avance=avance_maximo(id_eq)
 
