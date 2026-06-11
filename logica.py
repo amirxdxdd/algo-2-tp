@@ -13,13 +13,12 @@ def calcular_stats():
 
     for eid in equipos["id"]:  #recorre todos los equipos
 
-        local=partidos[partidos["equipo1"] == eid]    #con local y visitante me refiero a los partidos
-        visitante=partidos[partidos["equipo2"] == eid] #en donde el equipo fue el equipo 1 o el 2
+        local=partidos[partidos["equipo1"]==eid]    #con local y visitante me refiero a los partidos
+        visitante=partidos[partidos["equipo2"]==eid]    #en donde el equipo fue el equipo 1 o el 2
 
         pj=len(partidos[((partidos["equipo1"]==eid) | (partidos["equipo2"]==eid)) & (partidos["jugado"]==1)])   #cuenta la cantidad de partidos jugados, revisando en eq1 0 eq2, y jugado
         gf=int(local["goles1"].sum()) + int(visitante["goles2"].sum())
         gc=int(local["goles2"].sum()) + int(visitante["goles1"].sum())
-
 
 
         #las comparaciones devuelven una serie de pandas, de true y false, .sum da la cantidad de trues 
