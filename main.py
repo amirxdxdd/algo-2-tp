@@ -799,13 +799,13 @@ def abrir_informe2():
             textbox.insert("end", f"No existe el grupo {grupo.upper()}")
         else:
             textbox.insert("end", f"Grupo {grupo.upper()}\n")
-            textbox.insert("end", "─" * 55 + "\n")
-            textbox.insert("end", f"{'POS':<5} {'PAIS':<20} {'PJ':<5} {'GF':<5} {'GC':<5} {'DG':<5} {'PTS':<5}\n")
-            textbox.insert("end", "─" * 55 + "\n")
+            textbox.insert("end", "─" *72 + "\n")
+            textbox.insert("end", f"{'POS':<5} {'PAIS':<20} {'PJ':<5} {'GF':<5} {'GC':<5} {'DG':<5} {'PTS':<5} {'G':<5} {'P':<5} {'E':<5}\n")
+            textbox.insert("end", "─" *72 + "\n")
 
             for i in range(len(df)):
                 fila = df.iloc[i]
-                textbox.insert("end", f"{i+1:<5} {str(fila['pais']):<20} {int(fila['pj']):<5} {int(fila['gf']):<5} {int(fila['gc']):<5} {int(fila['dg']):<5} {int(fila['puntos']):<5}\n")
+                textbox.insert("end", f"{i+1:<5} {str(fila['pais']):<20} {int(fila['pj']):<5} {int(fila['gf']):<5} {int(fila['gc']):<5} {int(fila['dg']):<5} {int(fila['puntos']):<5} {int(fila['G']):<5} {int(fila['P']):<5} {int(fila['E']):<5}\n")
 
         textbox.configure(state="disabled")
 
@@ -1003,18 +1003,18 @@ def abrir_informe5():
 
     grupos=informe_todos_los_grupos()
 
-    encabezado=f"{'POS':<5} {'PAIS':<20} {'PJ':<5} {'GF':<5} {'GC':<5} {'DG':<5} {'PTS':<5}\n"
+    encabezado=f"{'POS':<5} {'PAIS':<20} {'PJ':<5} {'GF':<5} {'GC':<5} {'DG':<5} {'PTS':<5} {'G':<5} {'P':<5} {'E':<5}\n"
 
     for grupo in grupos:
         df=grupos[grupo]
         textbox.insert("end", f"Grupo {grupo}\n")
-        textbox.insert("end", "─" * 57 + "\n")
+        textbox.insert("end", "─" * 72 + "\n")
         textbox.insert("end", encabezado)
-        textbox.insert("end", "─" * 57 + "\n")
+        textbox.insert("end", "─" * 72 + "\n")
 
         for i in range(len(df)):
             fila = df.iloc[i]
-            textbox.insert("end", f"{i+1:<5} {str(fila['pais']):<20} {int(fila['pj']):<5} {int(fila['gf']):<5} {int(fila['gc']):<5} {int(fila['dg']):<5} {int(fila['puntos']):<5}\n")
+            textbox.insert("end", f"{i+1:<5} {str(fila['pais']):<20} {int(fila['pj']):<5} {int(fila['gf']):<5} {int(fila['gc']):<5} {int(fila['dg']):<5} {int(fila['puntos']):<5} {int(fila['G']):<5} {int(fila['P']):<5} {int(fila['E']):<5}\n")
 
         textbox.insert("end", "\n")  #espacio entre grupos
 

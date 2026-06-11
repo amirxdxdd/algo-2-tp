@@ -24,15 +24,21 @@ def calcular_stats():
 
         #las comparaciones devuelven una serie de pandas, de true y false, .sum da la cantidad de trues 
         puntos=int((local["goles1"]>local["goles2"]).sum())*3     #si la condicion es cierta 
-        puntos+=int((local["goles1"]==local["goles2"]).sum())* 1     #multiplico por 3 si es que gano y
-        puntos+=int((visitante["goles2"]>visitante["goles1"]).sum()) * 3     #por 1 si es que empato
-        puntos+=int((visitante["goles2"]==visitante["goles1"]).sum()) * 1
+        puntos+=int((local["goles1"]==local["goles2"]).sum())     #multiplico por 3 si es que gano y
+        puntos+=int((visitante["goles2"]>visitante["goles1"]).sum())*3     #multiplico por 1 si es que empato
+        puntos+=int((visitante["goles2"]==visitante["goles1"]).sum())
 
         #asignar los valores, ninguno existe dentro de equipos.xlsx, se agregan en stats
         stats.loc[stats["id"]==eid, "pj"]=pj
         stats.loc[stats["id"]==eid, "gf"]=gf
         stats.loc[stats["id"]==eid, "gc"]=gc
         stats.loc[stats["id"]==eid, "puntos"]=puntos
+        stats.loc[stats["id"]==eid, "G"]=int((local["goles1"]>local["goles2"]).sum())   #contar la cantidad de veces que gano, perdio o empato
+        stats.loc[stats["id"]==eid, "G"]+=int((visitante["goles2"]>visitante["goles1"]).sum())
+        stats.loc[stats["id"]==eid, "E"]=int((local["goles1"]==local["goles2"]).sum())
+        stats.loc[stats["id"]==eid, "E"]+=int((visitante["goles2"]==visitante["goles1"]).sum())
+        stats.loc[stats["id"]==eid, "P"]=int((local["goles1"]<local["goles2"]).sum())
+        stats.loc[stats["id"]==eid, "P"]+=int((visitante["goles2"]<visitante["goles1"]).sum())
 
     stats["dg"]=stats["gf"]-stats["gc"]
 
@@ -201,7 +207,7 @@ def informe_tabla_grupo(grupo, fecha):   #Informe 2
 
     partidos["fecha"]=pd.to_datetime(partidos["fecha"], dayfirst=True)
     fecha_dt=pd.to_datetime(fecha, dayfirst=True)
-    partidos=partidos[partidos["fecha"]<=fecha_dt]   #se queda solo con los partidos que estan antes de la fecha ingresada
+    partidos=partidos[(partidos["fecha"]<=fecha_dt) & partidos["jugado"]==1]   #se queda solo con los partidos que estan antes de la fecha ingresada
 
     stats=equipos.copy()
     stats["pj"]=0
@@ -226,6 +232,14 @@ def informe_tabla_grupo(grupo, fecha):   #Informe 2
         stats.loc[stats["id"]==eid, "gf"]=gf
         stats.loc[stats["id"]==eid, "gc"]=gc
         stats.loc[stats["id"]==eid, "puntos"]=puntos
+
+        stats.loc[stats["id"]==eid, "G"]=int((local["goles1"]>local["goles2"]).sum())   #contar la cantidad de veces que gano, perdio o empato
+        stats.loc[stats["id"]==eid, "G"]+=int((visitante["goles2"]>visitante["goles1"]).sum())
+        stats.loc[stats["id"]==eid, "E"]=int((local["goles1"]==local["goles2"]).sum())
+        stats.loc[stats["id"]==eid, "E"]+=int((visitante["goles2"]==visitante["goles1"]).sum())
+        stats.loc[stats["id"]==eid, "P"]=int((local["goles1"]<local["goles2"]).sum())
+        stats.loc[stats["id"]==eid, "P"]+=int((visitante["goles2"]<visitante["goles1"]).sum())
+
 
     stats["dg"]=stats["gf"]-stats["gc"]    #se crea la columna entera dg
 
